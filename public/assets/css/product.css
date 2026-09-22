@@ -163,6 +163,19 @@
   margin-bottom: var(--space-6);
 }
 .p-desc p { margin-bottom: var(--space-4); }
+.p-desc h1, .p-desc h2, .p-desc h5, .p-desc h6 { color: var(--color-ink); margin: var(--space-4) 0 var(--space-2); font-weight: 700; line-height: 1.4; }
+.p-desc h1 { font-size: 24px; }
+.p-desc h2 { font-size: 20px; }
+.p-desc h5 { font-size: 14px; }
+.p-desc h6 { font-size: 13px; }
+.p-desc hr { border: 0; border-top: 1px solid var(--color-line-strong); margin: var(--space-5) 0; }
+.p-desc table { width: 100%; border-collapse: collapse; margin: 0 0 var(--space-4); font-size: 14px; }
+.p-desc th, .p-desc td { border: 1px solid var(--color-line-strong); padding: 8px 10px; text-align: start; vertical-align: top; }
+.p-desc th { background: var(--color-surface); font-weight: 700; color: var(--color-ink); }
+.p-desc pre { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; direction: ltr; text-align: left; margin: 0 0 var(--space-4); font-size: 13px; }
+.p-desc code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.p-desc figure { margin: 0 0 var(--space-4); }
+.p-desc figcaption { font-size: 13px; color: var(--color-ink-muted); text-align: center; margin-top: 6px; }
 .p-desc h3, .p-desc h4 { color: var(--color-ink); margin: var(--space-4) 0 var(--space-2); font-weight: 700; line-height: 1.4; }
 .p-desc h3 { font-size: 18px; }
 .p-desc h4 { font-size: 16px; }

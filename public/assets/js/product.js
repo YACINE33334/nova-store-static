@@ -16,7 +16,7 @@
   // subset produced by the WYSIWYG editor; strips anything else).
   function sanitizeRich(html) {
     if (!html) return '';
-    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h3', 'h4', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span']);
+    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code']);
     const doc = new DOMParser().parseFromString(html, 'text/html');
     (doc.body.querySelectorAll('*') || []).forEach((node) => {
       const tag = node.tagName.toLowerCase();
@@ -44,9 +44,9 @@
           node.setAttribute('style', 'max-width:100%;border-radius:10px;');
         }
       }
-      if (tag === 'a' || tag === 'img' || tag === 'li') return;
+      if (tag === 'li') return;
       for (const attr of Array.from(node.attributes)) {
-        if (attr.name !== 'href' && attr.name !== 'src' && attr.name !== 'style') node.removeAttribute(attr.name);
+        if (attr.name !== 'href' && attr.name !== 'src' && attr.name !== 'style' && attr.name !== 'target' && attr.name !== 'rel' && attr.name !== 'alt' && attr.name !== 'loading') node.removeAttribute(attr.name);
       }
     });
     return doc.body.innerHTML;

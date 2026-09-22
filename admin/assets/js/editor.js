@@ -48,9 +48,86 @@
     rt.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  /* ---- Hybrid description editor: Normal (WYSIWYG) <-> HTML (code) ---- */
+  let descMode = 'normal';
+
+  function cleanDesc(html) {
+    if (!html) return '';
+    let h = String(html).replace(/&nbsp;/g, ' ').trim();
+    h = h.replace(/^(<br\s*\/?>[^<>]*)+$/i, '');
+    if (h === '<div></div>' || h === '<p></p>' || h === '<br>' || h === '<div><br></div>' || h === '') return '';
+    return h;
+  }
+
+  function syncNormalToHtml() {
+    const ta = $('#f-desc-html');
+    if (!ta) return;
+    const rt = $('#f-desc-rt');
+    ta.value = cleanDesc(rt ? rt.innerHTML : '');
+  }
+
+  function syncHtmlToNormal() {
+    const rt = $('#f-desc-rt');
+    if (!rt) return;
+    const ta = $('#f-desc-html');
+    rt.innerHTML = ta ? cleanDesc(ta.value) : '';
+  }
+
+  function descValue(clean) {
+    if (descMode === 'html') {
+      const ta = $('#f-desc-html');
+      const v = ta ? ta.value : '';
+      return clean ? cleanDesc(v) : v;
+    }
+    const rt = $('#f-desc-rt');
+    const v = rt ? rt.innerHTML : '';
+    return clean ? cleanDesc(v) : v;
+  }
+
+  function setDescMode(mode) {
+    if (mode === descMode) return;
+    const from = descMode;
+    if (from === 'normal' && mode === 'html') syncNormalToHtml();
+    if (from === 'html' && mode === 'normal') syncHtmlToNormal();
+    descMode = mode;
+    document.querySelectorAll('.ed-rt-mode-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    const normal = $('#ed-rt-panel-normal');
+    const htmlP = $('#ed-rt-panel-html');
+    if (normal) normal.hidden = mode !== 'normal';
+    if (htmlP) htmlP.hidden = mode !== 'html';
+    refreshDescPreview();
+  }
+
+  function insertHtmlImage(url) {
+    const ta = $('#f-desc-html');
+    if (!ta) return;
+    const img = '<img src="' + url + '" alt="" style="max-width:100%;height:auto;border-radius:8px;" />';
+    const start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    const end = ta.selectionEnd != null ? ta.selectionEnd : start;
+    ta.value = ta.value.slice(0, start) + img + ta.value.slice(end);
+    const np = start + img.length;
+    ta.focus();
+    ta.setSelectionRange(np, np);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    refreshDescPreview();
+  }
+
+  function bindDescModes() {
+    document.querySelectorAll('.ed-rt-mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setDescMode(btn.dataset.mode));
+    });
+  }
+
+  function refreshDescPreview() {
+    const rt = $('#f-desc-rt');
+    if (rt) rt.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   /* ---- Rich text "upload image from disk" (works in new + edit mode) ---- */
   function bindRichTextUpload() {
-    document.querySelectorAll('.ed-rt-upload').forEach((label) => {
+    document.querySelectorAll('#ed-rt-panel-normal .ed-rt-upload').forEach((label) => {
       const inp = label.querySelector('input[type=file]');
       if (!inp) return;
       label.addEventListener('mousedown', captureCaret);
@@ -92,6 +169,51 @@
           toast('تعذر بدء الرفع');
         }
       });
+    });
+  }
+
+  /* ---- HTML mode "upload image from disk" (inserts <img> at caret) ---- */
+  function bindHtmlUpload() {
+    const label = document.querySelector('#ed-rt-panel-html .ed-rt-upload-html');
+    const inp = document.getElementById('f-desc-html-upload');
+    if (!label || !inp) return;
+    inp.addEventListener('change', () => {
+      const file = inp.files && inp.files[0];
+      if (!file) return;
+      label.classList.add('busy');
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload');
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.onload = () => {
+          label.classList.remove('busy');
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const r = JSON.parse(xhr.responseText);
+              if (r.url) {
+                insertHtmlImage(r.url);
+                inp.value = '';
+              } else {
+                toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
+              }
+            } catch (e) { toast('استجابة غير صالحة من الخادم'); }
+          } else {
+            try {
+              const r = JSON.parse(xhr.responseText);
+              toast('فشل الرفع: ' + (r.error || xhr.status));
+            } catch (e) { toast('فشل الرفع: ' + xhr.status); }
+          }
+        };
+        xhr.onerror = () => {
+          label.classList.remove('busy');
+          toast('تعذر الاتصال بالخادم أثناء الرفع');
+        };
+        xhr.send(file);
+      } catch (err) {
+        label.classList.remove('busy');
+        console.error('[editor] html upload failed to start:', err);
+        toast('تعذر بدء الرفع');
+      }
     });
   }
 
@@ -528,6 +650,8 @@
 
     initI18nEditor();
     bindRichTextUpload();
+    bindHtmlUpload();
+    bindDescModes();
 
     const boot = () => {
       if (isNew) { initNewMode(); return; }
@@ -657,10 +781,9 @@
       featsEl.appendChild(row);
     }
 
-    /* ---- WYSIWYG rich text ---- */
+    /* ---- Hybrid desc: WYSIWYG -> HTML sync ---- */
     function richTextHtml() {
-      const area = $('#f-desc-rt');
-      return area ? area.innerHTML : '';
+      return descValue(true);
     }
 
     /* ---- Live preview ---- */
@@ -720,6 +843,8 @@
       if (el) el.addEventListener('input', refreshPreview);
     });
     $('#f-desc-rt').addEventListener('input', refreshPreview);
+    const taInput1 = $('#f-desc-html');
+    if (taInput1) taInput1.addEventListener('input', refreshPreview);
     $('#f-active').addEventListener('change', refreshPreview);
     $('#f-low30').addEventListener('change', refreshPreview);
 
@@ -812,6 +937,8 @@
       $('#f-low30').checked = data.low30 !== false;
       $('#f-lead').value = data.lead || '';
       $('#f-desc-rt').innerHTML = data.desc || '';
+      const taDesc = $('#f-desc-html');
+      if (taDesc) taDesc.value = data.desc || '';
       $('#f-cta').value = data.cta || 'Buy Now';
       $('#f-cta-link').value = data.ctaLink || '#add';
       $('#f-active').checked = data.active !== false;
@@ -939,12 +1066,7 @@
       }
 
       function richTextHtml() {
-        const el = $('#f-desc-rt');
-        if (!el) return '';
-        let h = el.innerHTML.replace(/&nbsp;/g, ' ').trim();
-        h = h.replace(/^(<br\s*\/?>[^<>]*)+$/i, '');
-        if (h === '<div></div>' || h === '<p></p>' || h === '<br>' || h === '<div><br></div>' || h === '') return '';
-        return h;
+        return descValue(true);
       }
 
       function collect() {
@@ -979,7 +1101,9 @@
       const liveFields = ['#f-name', '#f-headline', '#f-price', '#f-old', '#f-lead', '#f-cta',
         '#f-rating', '#f-reviews-count', '#f-sold', '#f-sku', '#f-material', '#f-origen'];
       liveFields.forEach((sel) => $(sel).addEventListener('input', refreshPreview));
-      $('#f-desc-rt').addEventListener('input', refreshPreview);
+$('#f-desc-rt').addEventListener('input', refreshPreview);
+      const taInput2 = $('#f-desc-html');
+      if (taInput2) taInput2.addEventListener('input', refreshPreview);
 
       /* ---- Rich text toolbar ---- */
       document.querySelectorAll('.ed-rt-btn').forEach((btn) => {
