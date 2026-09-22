@@ -58,33 +58,38 @@
         const file = inp.files && inp.files[0];
         if (!file) return;
         label.classList.add('busy');
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.onload = () => {
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/upload');
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.onload = () => {
+            label.classList.remove('busy');
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const r = JSON.parse(xhr.responseText);
+                if (r.url) {
+                  insertImageHtml(r.url);
+                  inp.value = '';
+                } else {
+                  toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
+                }
+              } catch (e) { toast('استجابة غير صالحة من الخادم'); }
+            } else {
+              try {
+                const r = JSON.parse(xhr.responseText);
+                toast('فشل الرفع: ' + (r.error || xhr.status));
+              } catch (e) { toast('فشل الرفع: ' + xhr.status); }
+            }
+          };
+          xhr.onerror = () => {
+            label.classList.remove('busy');
+            toast('تعذر الاتصال بالخادم أثناء الرفع');
+          };
+          xhr.send(file);
+        } catch (err) {
           label.classList.remove('busy');
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const r = JSON.parse(xhr.responseText);
-              if (r.url) {
-                insertImageHtml(r.url);
-                inp.value = '';
-              } else {
-                toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
-              }
-            } catch (e) { toast('استجابة غير صالحة من الخادم'); }
-          } else {
-            try {
-              const r = JSON.parse(xhr.responseText);
-              toast('فشل الرفع: ' + (r.error || xhr.status));
-            } catch (e) { toast('فشل الرفع: ' + xhr.status); }
-          }
-        };
-        xhr.onerror = () => {
-          label.classList.remove('busy');
-          toast('تعذر الاتصال بالخادم أثناء الرفع');
-        };
-        xhr.send(file);
+          toast('تعذر بدء الرفع');
+        }
       });
     });
   }
@@ -208,28 +213,33 @@
             const btn = row.querySelector('.ed-img-upload');
             const prev = row.querySelector('.ed-img-input').value;
             btn.classList.add('busy');
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload');
-            xhr.setRequestHeader('Content-Type', file.type);
-            xhr.onload = () => {
+            try {
+              const xhr = new XMLHttpRequest();
+              xhr.open('POST', '/api/upload');
+              xhr.setRequestHeader('Content-Type', file.type);
+              xhr.onload = () => {
+                btn.classList.remove('busy');
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  try {
+                    const r = JSON.parse(xhr.responseText);
+                    if (r.url) {
+                      row.querySelector('.ed-img-input').value = r.url; rv.imgs[ii] = r.url;
+                      if (prev && prev !== r.url) removeStoredImage(prev);
+                    }
+                    else { toast('خطأ: ' + (r.error || '')); }
+                  } catch (err) { toast('استجابة غير صالحة'); }
+                } else {
+                  try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status)); }
+                  catch (err) { toast('فشل الرفع: ' + xhr.status); }
+                }
+              };
+              xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
+              xhr.send(file);
+              e.target.value = '';
+            } catch (err) {
               btn.classList.remove('busy');
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  const r = JSON.parse(xhr.responseText);
-                  if (r.url) {
-                    row.querySelector('.ed-img-input').value = r.url; rv.imgs[ii] = r.url;
-                    if (prev && prev !== r.url) removeStoredImage(prev);
-                  }
-                  else { toast('خطأ: ' + (r.error || '')); }
-                } catch (err) { toast('استجابة غير صالحة'); }
-              } else {
-                try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status)); }
-                catch (err) { toast('فشل الرفع: ' + xhr.status); }
-              }
-            };
-            xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-            xhr.send(file);
-            e.target.value = '';
+              toast('تعذر بدء الرفع');
+            }
           });
           row.querySelector('.ed-img-del').addEventListener('click', () => {
             removeStoredImage(rv.imgs[ii]);
@@ -583,29 +593,34 @@
         const btn = row.querySelector('.ed-img-upload');
         const prev = input.value;
         btn.classList.add('busy');
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.onload = () => {
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/upload');
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.onload = () => {
+            btn.classList.remove('busy');
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const r = JSON.parse(xhr.responseText);
+                if (r.url) {
+                  input.value = r.url;
+                  data.images[index] = r.url;
+                  refreshPreview();
+                  if (prev && prev !== r.url) removeStoredImage(prev);
+                } else { toast('خطأ: ' + (r.error || '')); }
+              } catch (err) { toast('استجابة غير صالحة'); }
+            } else {
+              try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status)); }
+              catch (err) { toast('فشل الرفع: ' + xhr.status); }
+            }
+          };
+          xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
+          xhr.send(file);
+          e.target.value = '';
+        } catch (err) {
           btn.classList.remove('busy');
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const r = JSON.parse(xhr.responseText);
-              if (r.url) {
-                input.value = r.url;
-                data.images[index] = r.url;
-                refreshPreview();
-                if (prev && prev !== r.url) removeStoredImage(prev);
-              } else { toast('خطأ: ' + (r.error || '')); }
-            } catch (err) { toast('استجابة غير صالحة'); }
-          } else {
-            try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status)); }
-            catch (err) { toast('فشل الرفع: ' + xhr.status); }
-          }
-        };
-        xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-        xhr.send(file);
-        e.target.value = '';
+          toast('تعذر بدء الرفع');
+        }
       });
       row.querySelector('.ed-img-del').addEventListener('click', () => {
         removeStoredImage(data.images[index]);
@@ -862,29 +877,34 @@
           const btn = row.querySelector('.ed-img-upload');
           const prev = input.value;
           btn.classList.add('busy');
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', '/api/upload');
-          xhr.setRequestHeader('Content-Type', file.type);
-          xhr.onload = () => {
+          try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/upload');
+            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.onload = () => {
+              btn.classList.remove('busy');
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const r = JSON.parse(xhr.responseText);
+                  if (r.url) {
+                    input.value = r.url;
+                    data.images[index] = r.url;
+                    if (prev && prev !== r.url) removeStoredImage(prev);
+                  } else { toast('خطأ: ' + (r.error || ''));
+                  }
+                } catch (err) { toast('استجابة غير صالحة'); }
+              } else {
+                try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status));
+                } catch (err) { toast('فشل الرفع: ' + xhr.status); }
+              }
+            };
+            xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
+            xhr.send(file);
+            e.target.value = '';
+          } catch (err) {
             btn.classList.remove('busy');
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const r = JSON.parse(xhr.responseText);
-                if (r.url) {
-                  input.value = r.url;
-                  data.images[index] = r.url;
-                  if (prev && prev !== r.url) removeStoredImage(prev);
-                } else { toast('خطأ: ' + (r.error || ''));
-                }
-              } catch (err) { toast('استجابة غير صالحة'); }
-            } else {
-              try { toast('فشل الرفع: ' + (JSON.parse(xhr.responseText).error || xhr.status));
-              } catch (err) { toast('فشل الرفع: ' + xhr.status); }
-            }
-          };
-          xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-          xhr.send(file);
-          e.target.value = '';
+            toast('تعذر بدء الرفع');
+          }
         });
         row.querySelector('.ed-img-del').addEventListener('click', () => {
           removeStoredImage(data.images[index]);
