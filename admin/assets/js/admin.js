@@ -1003,6 +1003,17 @@
           try {
             await apiDeleteProduct(id);
             productStore = productStore.filter((x) => x.id !== Number(id));
+            const urls = (p && p.images && p.images.length ? p.images : []).slice();
+            try {
+              if (p && p.desc) {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = p.desc;
+                tmp.querySelectorAll('img').forEach((im) => { if (im && im.getAttribute('src')) urls.push(im.getAttribute('src')); });
+              }
+            } catch (e) { /* keep going */ }
+            if (window.NovaSupabase && window.NovaSupabase.deleteObject) {
+              urls.forEach((u) => window.NovaSupabase.deleteObject(u).catch(() => {}));
+            }
             toast('تم حذف المنتج', 'success');
             renderRows();
           } catch (e) {
