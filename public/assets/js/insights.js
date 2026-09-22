@@ -9,32 +9,32 @@
     {
       cat: 'Novedades', date: '4 sept 2026', min: 3, title: 'Hervidor Inteligente: lo nuevo en tu cocina',
       ex: 'Control digital de temperatura, temporizador de 24 horas y un acabado pensado para durar. Así es nuestro nuevo hervidor.',
-      hue: '#eef0f0', url: '/product.html?id=10',
+      hue: '#eef0f0', url: 'product.html?id=10',
     },
     {
       cat: 'Guías de compra', date: '29 ago 2026', min: 4, title: 'Guía de tallas: camisa Aurelia',
       ex: 'De la avalancha del hombro al largo del faldón: cómo elegir tu talla para que quede justo como te gusta.',
-      hue: '#e7ecf3', url: '/product.html?id=1',
+      hue: '#e7ecf3', url: 'product.html?id=1',
     },
     {
       cat: 'Cuidado', date: '21 ago 2026', min: 5, title: 'Cómo cuidar tu lino para que dure años',
       ex: 'Tres gestos sencillos que mantienen el lino suave sin perder su estructura, temporada tras temporada.',
-      hue: '#f0ead8', url: '/product.html?id=1',
+      hue: '#f0ead8', url: 'product.html?id=1',
     },
     {
       cat: 'Detrás de escena', date: '12 ago 2026', min: 6, title: 'En el taller: seda de Como',
       ex: 'Visitamos el taller familiar que estampa nuestros foulards. Pequeños lotes, dobladillos cosidos a mano.',
-      hue: '#e3e4ee', url: '/product.html?id=5',
+      hue: '#e3e4ee', url: 'product.html?id=5',
     },
     {
       cat: 'Guías de compra', date: '30 jul 2026', min: 4, title: 'Montar tu tienda en NOVA, en 5 pasos',
       ex: 'Del catálogo al primer pedido sin fricción. Un recorrido breve por el constructor y el panel de administración.',
-      hue: '#ece8df', url: '/builder.html',
+      hue: '#ece8df', url: 'builder.html',
     },
     {
       cat: 'Cuidado', date: '18 jul 2026', min: 3, title: 'Mantener tu abrigo Meridian impecable',
       ex: 'Cepillado en seco, perchas anchas y muy poca agua: cómo conservar la mezcla de lana como el primer día.',
-      hue: '#eef1f7', url: '/product.html?id=2',
+      hue: '#eef1f7', url: 'product.html?id=2',
     },
   ];
 

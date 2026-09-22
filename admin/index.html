@@ -8,14 +8,14 @@
   <meta name="description" content="لوحة تحكم المتجر — إحصائيات، منتجات، طلبات، عملاء وإعدادات." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin/assets/css/admin.css?v=18" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=18" />
 </head>
 <body>
   <div class="app" id="app">
     <!-- ===================== SIDEBAR ===================== -->
     <aside class="sidebar" id="sidebar">
       <div class="side-head">
-        <a href="/admin" class="side-logo"><span class="logo-mark">N</span> NOVA</a>
+        <a href="index.html" class="side-logo"><span class="logo-mark">N</span> NOVA</a>
         <button class="side-close" id="side-close" aria-label="إغلاق">&times;</button>
       </div>
 
@@ -60,7 +60,7 @@
       </nav>
 
       <div class="side-foot">
-        <a class="nav-item plain" href="/" target="_blank">
+        <a class="nav-item plain" href=".." target="_blank">
           <span class="nav-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
           </span>
@@ -106,17 +106,17 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/nova-supabase.js"></script>
-  <script src="/assets/js/api.js"></script>
-  <script src="/assets/js/currency.js?v=1"></script>
-<script src="/admin/assets/js/admin.js?v=31"></script>
+  <script src="../assets/js/nova-supabase.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/currency.js?v=1"></script>
+<script src="assets/js/admin.js?v=31"></script>
   <script>
     (function () {
       var btn = document.getElementById('logout-btn');
       if (btn) {
         btn.addEventListener('click', function () {
           fetch('/api/auth/logout', { method: 'POST' }).catch(function () {}).then(function () {
-            location.href = '/admin/login';
+            location.href = 'login.html';
           });
         });
       }

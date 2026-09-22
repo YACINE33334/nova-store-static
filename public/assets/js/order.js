@@ -553,8 +553,8 @@
         <p class="ok-note">${t('ok_note')}</p>
 
         <div class="ok-actions">
-          <a class="btn btn-accent" href="/#products">${t('ok_continue')}</a>
-          <a class="btn btn-outline" href="/">${t('ok_home')}</a>
+          <a class="btn btn-accent" href="./#products">${t('ok_continue')}</a>
+          <a class="btn btn-outline" href="./">${t('ok_home')}</a>
         </div>
       </div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -566,7 +566,7 @@
         <div>
           <h1 class="order-title">${t('np_title')}</h1>
           <p class="order-sub">${msg}</p>
-          <a class="btn btn-accent" href="/#products">${t('np_back_shop')}</a>
+          <a class="btn btn-accent" href="./#products">${t('np_back_shop')}</a>
         </div>
       </div>`;
   }

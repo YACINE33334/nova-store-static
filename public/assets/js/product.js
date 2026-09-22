@@ -84,23 +84,23 @@
   };
 
   const reviewsPool = [
-    { n: 'Carmen Ruiz', c: 'España', d: 'el 15 de agosto de 2026', s: 5, h: 14, imgs: ['/assets/img/foodwarmer-1.png', '/assets/img/foodwarmer-4.png'], title: 'Calidad excelente y llegada perfecta', body: ['El producto llegó en perfecto estado y muy bien embalado. La calidad se nota desde el primer momento: los materiales y el acabado son de primera.', 'Llevo usando el producto cada día desde que llegó y cumple exactamente lo que promete. La relación calidad-precio me parece de lo mejor del mercado.'] },
+    { n: 'Carmen Ruiz', c: 'España', d: 'el 15 de agosto de 2026', s: 5, h: 14, imgs: ['assets/img/foodwarmer-1.png', 'assets/img/foodwarmer-4.png'], title: 'Calidad excelente y llegada perfecta', body: ['El producto llegó en perfecto estado y muy bien embalado. La calidad se nota desde el primer momento: los materiales y el acabado son de primera.', 'Llevo usando el producto cada día desde que llegó y cumple exactamente lo que promete. La relación calidad-precio me parece de lo mejor del mercado.'] },
     { n: 'Javier Ortega', c: 'Alemania', d: 'el 2 de agosto de 2026', s: 5, h: 9, title: 'Cumple su función a la perfección', body: ['Cumple perfectamente su función y lo uso a diario desde que llegó. No puedo estar más contento con el rendimiento.', 'El diseño es sobrio y elegante, y se sienta de maravilla en cualquier espacio. Repetiré sin duda con esta marca en el futuro.'] },
-    { n: 'Lucía Fernández', c: 'Francia', d: 'el 18 de julio de 2026', s: 4, h: 21, imgs: ['/assets/img/foodwarmer-2.png'], title: 'Buen acabado, mejor de lo esperado', body: ['La calidad del acabado es muy buena y en persona luce mucho mejor que en las fotografías del anuncio.', 'Le doy cuatro estrellas porque el envío tardó más de lo prometido, algo que no está relacionado con el producto en sí. Por lo demás, todo correcto.'] },
-    { n: 'Antonio Pérez', c: 'Reino Unido', d: 'el 5 de julio de 2026', s: 5, h: 33, imgs: ['/assets/img/foodwarmer-3.png', '/assets/img/foodwarmer-1.png'], title: 'Merece totalmente la pena', body: ['Al principio dudaba, pero merece totalmente la pena. Llevo un mes usándolo todos los días y funciona genial en todo momento.', 'La entrega fue rápida y el embalaje muy cuidada. Se nota que el fabricante pone atención a los detalles y a la experiencia del cliente.'] },
-    { n: 'Marta Domínguez', c: 'Italia', d: 'el 20 de junio de 2026', s: 5, h: 7, imgs: ['/assets/img/foodwarmer-4.png'], title: 'Un acierto como regalo', body: ['Lo compré pensando en un regalo y fue un auténtico acierto que gustó muchísimo a la persona que lo recibió.', 'El empaquetado es muy cuidado, con una presentación que se nota de gama alta. La calidad del producto acompaña a la presentación.'] },
+    { n: 'Lucía Fernández', c: 'Francia', d: 'el 18 de julio de 2026', s: 4, h: 21, imgs: ['assets/img/foodwarmer-2.png'], title: 'Buen acabado, mejor de lo esperado', body: ['La calidad del acabado es muy buena y en persona luce mucho mejor que en las fotografías del anuncio.', 'Le doy cuatro estrellas porque el envío tardó más de lo prometido, algo que no está relacionado con el producto en sí. Por lo demás, todo correcto.'] },
+    { n: 'Antonio Pérez', c: 'Reino Unido', d: 'el 5 de julio de 2026', s: 5, h: 33, imgs: ['assets/img/foodwarmer-3.png', 'assets/img/foodwarmer-1.png'], title: 'Merece totalmente la pena', body: ['Al principio dudaba, pero merece totalmente la pena. Llevo un mes usándolo todos los días y funciona genial en todo momento.', 'La entrega fue rápida y el embalaje muy cuidada. Se nota que el fabricante pone atención a los detalles y a la experiencia del cliente.'] },
+    { n: 'Marta Domínguez', c: 'Italia', d: 'el 20 de junio de 2026', s: 5, h: 7, imgs: ['assets/img/foodwarmer-4.png'], title: 'Un acierto como regalo', body: ['Lo compré pensando en un regalo y fue un auténtico acierto que gustó muchísimo a la persona que lo recibió.', 'El empaquetado es muy cuidado, con una presentación que se nota de gama alta. La calidad del producto acompaña a la presentación.'] },
     { n: 'Diego Campos', c: 'Portugal', d: 'el 10 de junio de 2026', s: 4, h: 5, title: 'Bien fabricado, con pequeños detalles a mejorar', body: ['Sólido y bien fabricado, se nota que está hecho para durar en el tiempo y aguantar el uso diario.', 'El único pero es que las instrucciones vienen solo en inglés, aunque es fácil de entender por su diseño sencillo e intuitivo.'] },
     { n: 'Paula Navarro', c: 'España', d: 'el 28 de mayo de 2026', s: 5, h: 18, title: 'Entrega rápida y gran calidad', body: ['La entrega fue rapidísima y el producto llegó justo como lo describían en el anuncio, sin sorpresas.', 'Funcionó a la primera y todo perfecto. Definitivamente volveré a comprar aquí por el buen servicio y la calidad.'] },
     { n: 'Sergio Molina', c: 'España', d: 'el 14 de mayo de 2026', s: 3, h: 11, title: 'Correcto por el precio', body: ['Está bien para el precio que tiene. El acabado es correcto aunque no es perfecto: se le notan algunas imperfecciones pequeñas en el detalle.', 'Aun así, cumple lo que promete en su ficha y hace bien su función principal, que al final es lo importante.'] },
-    { n: 'Andrés Torres', c: 'España', d: 'el 9 de abril de 2026', s: 5, h: 12, imgs: ['/assets/img/foodwarmer-2.png'], title: 'Muy contento con la compra', body: ['Sigo sorprendido por lo bien que está hecho para lo que cuesta. Se ve elegante y funciona como debe desde el primer día.', 'Lo he recomendado ya a dos amigos y ambos están igual de satisfechos. Sin duda una apuesta segura.'] },
+    { n: 'Andrés Torres', c: 'España', d: 'el 9 de abril de 2026', s: 5, h: 12, imgs: ['assets/img/foodwarmer-2.png'], title: 'Muy contento con la compra', body: ['Sigo sorprendido por lo bien que está hecho para lo que cuesta. Se ve elegante y funciona como debe desde el primer día.', 'Lo he recomendado ya a dos amigos y ambos están igual de satisfechos. Sin duda una apuesta segura.'] },
     { n: 'Nora El Mansouri', c: 'Marruecos', d: 'el 27 de marzo de 2026', s: 4, h: 6, title: 'Muy buen producto, atención al detalle', body: ['El diseño es cuidado y los materiales se sienten de calidad. La presentación del embalaje también muy profesional.', 'Le falta muy poco para ser perfecto: un manual con más idiomas habría estado mejor, aunque por intuición se usa sin problemas.'] },
-    { n: 'Hugo Ferreiro', c: 'España', d: 'el 12 de marzo de 2026', s: 5, h: 22, imgs: ['/assets/img/foodwarmer-4.png', '/assets/img/foodwarmer-3.png'], title: 'Compré con dudas y acerté', body: ['Leía reseñas por si merecía la pena y me animé. No ha podido salir mejor: calidad, acabados y funcionamiento están a la altura.', 'La entrega fue puntual y el paquete llegó impecable. Repetiré con esta tienda sin pensármelo.'] },
+    { n: 'Hugo Ferreiro', c: 'España', d: 'el 12 de marzo de 2026', s: 5, h: 22, imgs: ['assets/img/foodwarmer-4.png', 'assets/img/foodwarmer-3.png'], title: 'Compré con dudas y acerté', body: ['Leía reseñas por si merecía la pena y me animé. No ha podido salir mejor: calidad, acabados y funcionamiento están a la altura.', 'La entrega fue puntual y el paquete llegó impecable. Repetiré con esta tienda sin pensármelo.'] },
     { n: 'Isabel Romero', c: 'España', d: 'el 28 de febrero de 2026', s: 5, h: 4, title: 'Cumple todas las expectativas', body: ['Lo uso prácticamente a diario desde hace semanas y sigue como el primer día. Muy bien pensado y muy fácil de usar.', 'La relación calidad-precio es excelente. No tengo ninguna queja, al contrario.'] },
     { n: 'Marco Sandri', c: 'Italia', d: 'el 15 de febrero de 2026', s: 4, h: 9, title: 'Buen equilibrio entre precio y calidad', body: ['Por el precio que tiene, la construcción y el acabado están muy por encima de lo esperado.', 'Le doy cuatro estrellas porque creo que el cable podría ser un poco más largo, pero es un detalle menor.'] },
-    { n: 'Inés Vidal', c: 'España', d: 'el 2 de febrero de 2026', s: 5, h: 15, imgs: ['/assets/img/foodwarmer-1.png'], title: 'Un regalo que acertó', body: ['Lo elegí como regalo y la reacción fue mejor de lo que imaginaba. La presentación y la calidad lo dicen todo.', 'Encima la entrega fue rápida y sin ninguna incidencia. Experiencia de compra impecable.'] },
+    { n: 'Inés Vidal', c: 'España', d: 'el 2 de febrero de 2026', s: 5, h: 15, imgs: ['assets/img/foodwarmer-1.png'], title: 'Un regalo que acertó', body: ['Lo elegí como regalo y la reacción fue mejor de lo que imaginaba. La presentación y la calidad lo dicen todo.', 'Encima la entrega fue rápida y sin ninguna incidencia. Experiencia de compra impecable.'] },
     { n: 'Daniela Costa', c: 'Portugal', d: 'el 19 de enero de 2026', s: 5, h: 8, title: 'Perfecto para el día a día', body: ['Es justo lo que buscaba: sencillo, bien hecho y con un diseño que no desentona en ningún sitio.', 'Lo recomiendo sin reservas si quieres algo fiable sin pagar de más.'] },
     { n: 'Youssef Benali', c: 'Marruecos', d: 'el 7 de enero de 2026', s: 4, h: 5, title: 'Buena compra, pequeño margen de mejora', body: ['El producto funciona muy bien y el acabado está cuidado. El manejo de los ajustes es intuitivo.', 'Solo eché en falta un par de opciones extra, pero nada importante en el uso diario.'] },
-    { n: 'Candela Ortiz', c: 'España', d: 'el 20 de diciembre de 2025', s: 5, h: 17, imgs: ['/assets/img/foodwarmer-4.png'], title: 'La mejor compra del año', body: ['Llevo meses comparando opciones y esta ha sido, sin discusión, la mejor elección posible.', 'Todo lo que promete en la ficha lo cumple, y con creces. El equipo de atención al cliente, de diez también.'] },
+    { n: 'Candela Ortiz', c: 'España', d: 'el 20 de diciembre de 2025', s: 5, h: 17, imgs: ['assets/img/foodwarmer-4.png'], title: 'La mejor compra del año', body: ['Llevo meses comparando opciones y esta ha sido, sin discusión, la mejor elección posible.', 'Todo lo que promete en la ficha lo cumple, y con creces. El equipo de atención al cliente, de diez también.'] },
     { n: 'Emilio Ríos', c: 'España', d: 'el 5 de diciembre de 2025', s: 4, h: 7, title: 'Muy recomendable para este precio', body: ['No me arrepiento de la compra: cumple su función de forma sobresaliente y con un acabado muy aceptable.', 'Es posible que no quede a la altura de opciones el doble de caras, pero por este precio es difícil encontrar algo mejor.'] },
     { n: 'Amelie Laurent', c: 'Francia', d: 'el 22 de noviembre de 2025', s: 5, h: 11, title: 'Nada que objetar', body: ['Producto entregado a tiempo, embalaje impecable y calidad evidente desde el primer uso.', 'Aprendimos a usarlo sin leer casi el manual, así de intuitivo es. Volveremos a comprar aquí.'] },
     { n: 'Raúl Merino', c: 'España', d: 'el 8 de noviembre de 2025', s: 3, h: 13, title: 'Correcto, con matices', body: ['Cumple lo esencial y el precio es justo, pero los acabados podrían pulirse un poco más en ciertos detalles.', 'Si buscas algo funcional sin complicaciones, es una opción válida.'] }
@@ -223,7 +223,7 @@
           <span class="eyebrow">Producto no encontrado</span>
           <h1 class="section-title">Este producto no existe.</h1>
           <p class="section-sub" style="margin:0 auto 24px">Es posible que la página se haya movido o que el producto ya no esté disponible.</p>
-          <a class="btn btn-accent" href="/#products">Volver a la colección</a>
+          <a class="btn btn-accent" href="./#products">Volver a la colección</a>
         </div>
       </section>`;
   }
@@ -276,8 +276,8 @@
     root.innerHTML = `
       <!-- BREADCRUMB -->
       <div class="container p-crumb">
-        <a href="/">Inicio</a><span>/</span>
-        <a href="/#products">Tienda</a><span>/</span>
+        <a href="./">Inicio</a><span>/</span>
+        <a href="./#products">Tienda</a><span>/</span>
         <span class="crumb-current">${product.name}</span>
       </div>
 
@@ -311,7 +311,7 @@
             <span>Precio más bajo en los últimos 30 días</span>
           </div>` : ''}
 
-          <img class="p-delivery-img" src="/assets/img/ZR.png" alt="Contra reembolso">
+          <img class="p-delivery-img" src="assets/img/ZR.png" alt="Contra reembolso">
 
           <!-- Actions -->
           <div class="p-actions">
@@ -548,7 +548,7 @@
 
     // Buy Now → open the order form page with product, qty 1
     const goBuy = () => {
-      location.href = '/order.html?id=' + product.id + '&qty=1';
+      location.href = 'order.html?id=' + product.id + '&qty=1';
     };
     $('#p-buy').addEventListener('click', goBuy);
 

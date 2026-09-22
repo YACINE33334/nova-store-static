@@ -9,7 +9,7 @@
   fetch('/api/auth/me', { cache: 'no-store' })
     .then((r) => {
       if (r.status === 401) {
-        location.replace('/admin/login');
+        location.replace('login.html');
         return null;
       }
       return r.json();
@@ -918,17 +918,17 @@
           <td>${fmtNum(p.sold)}</td>
           <td>${statusBadge(statusOf(p))}</td>
           <td>
-            <a class="lp-chip" href="/product.html?id=${p.id}" target="_blank" rel="noopener" title="${landingTitle(p)}">صفحة الهبوط</a>
+            <a class="lp-chip" href="../product.html?id=${p.id}" target="_blank" rel="noopener" title="${landingTitle(p)}">صفحة الهبوط</a>
           </td>
           <td>
             <div class="row-actions">
               <button class="btn btn-secondary btn-sm btn-icon" data-lp-gen="${p.id}" title="توليد صفحة هبوط افتراضية (تصميم أوروبي)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 10V8"/><path d="M15 16v-2"/><path d="M15 22v-2"/><path d="M12 6.5l.9 1.8 1.9.9-1.9.9-.9 1.8-.9-1.8-1.9-.9 1.9-.9Z"/><path d="M19 14l.8 1.6 1.7.9-1.7.9-.8 1.6-.9-1.6-1.7-.9 1.7-.9Z"/><path d="M4 15h2a2 2 0 0 1 0 4H4v3"/></svg>
                 توليد</button>
-              <a class="btn btn-secondary btn-sm" href="/product.html?id=${p.id}" target="_blank" rel="noopener" title="معاينة صفحة الهبوط كما يراها العميل (Storefront)">
+              <a class="btn btn-secondary btn-sm" href="../product.html?id=${p.id}" target="_blank" rel="noopener" title="معاينة صفحة الهبوط كما يراها العميل (Storefront)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><path d="M12 12h.01"/></svg>
                 معاينة</a>
-              <a class="btn btn-secondary btn-sm" href="/admin/product-editor.html?id=${p.id}" title="تعديل محتوى صفحة الهبوط">
+              <a class="btn btn-secondary btn-sm" href="product-editor.html?id=${p.id}" title="تعديل محتوى صفحة الهبوط">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                 تعديل</a>
               <button class="btn btn-secondary btn-sm" data-copy-link="${p.id}" title="نسخ رابط صفحة الهبوط">
@@ -948,7 +948,7 @@
     }
 
     function copyLink(id) {
-      const url = location.origin + '/product.html?id=' + id;
+      const url = new URL('../product.html?id=' + id, location.href).href;
       const done = () => toast('تم نسخ رابط صفحة الهبوط', 'success');
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
@@ -984,7 +984,7 @@
         if (i !== -1) productStore[i] = Object.assign({}, toAdminRow(saved), productStore[i]);
         else productStore.push(saved);
         toast('تم توليد صفحة هبوط افتراضية', 'success');
-        window.open('/product.html?id=' + saved.id, '_blank');
+        window.open('../product.html?id=' + saved.id, '_blank');
         renderRows();
       } catch (e) {
         toast('تعذر الحفظ: ' + e.message);
@@ -1072,7 +1072,7 @@
           renderRows();
           close();
           toast('تم إنشاء المنتج وصفحة الهبوط', 'success');
-          window.open('/admin/product-editor.html?id=' + created.id, '_blank');
+          window.open('product-editor.html?id=' + created.id, '_blank');
         } catch (e) {
           toast('تعذر الإنشاء: ' + e.message);
         }
@@ -1098,7 +1098,7 @@
       });
     });
     $('#prod-search').addEventListener('input', (e) => { productSearch = e.target.value.trim(); renderRows(); });
-    $('#prod-add').addEventListener('click', () => { window.location.href = '/admin/product-editor.html'; });
+    $('#prod-add').addEventListener('click', () => { window.location.href = 'product-editor.html'; });
   };
 
   /* ==================================================== */

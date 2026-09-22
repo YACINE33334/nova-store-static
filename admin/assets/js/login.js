@@ -39,7 +39,7 @@
       const res = await fetch('/api/auth/status', { cache: 'no-store' });
       const st = await res.json();
       if (st.loggedIn) {
-        location.href = '/admin';
+        location.href = 'index.html';
         return;
       }
       title.textContent = 'تسجيل الدخول';
@@ -74,7 +74,7 @@
       });
       const data = await res.json();
       if (res.ok) {
-        location.href = '/admin';
+        location.href = 'index.html';
       } else {
         showError(data.error || 'حدث خطأ غير متوقع.');
       }

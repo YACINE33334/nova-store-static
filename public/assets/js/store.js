@@ -69,7 +69,7 @@
       desc: 'Hervidor inteligente con control digital de temperatura y temporizador programable. Perfecto para preparar cereales calientes, chocolate, té y más. Diseño compacto y elegante con acabados premium y base giratoria de 360°.',
       features: ['Control digital de temperatura con pantalla LED', 'Capacidad de 1.7 litros de acero inoxidable', 'Temporizador programable de hasta 24 horas', 'Base giratoria de 360° con cable enrollador', 'Funcion calentar rapida en 3 minutos', 'Diseño compacto y elegante con acabados premium'],
       stock: 45,
-      images: ['/assets/img/foodwarmer-1.png', '/assets/img/foodwarmer-2.png', '/assets/img/foodwarmer-3.png', '/assets/img/foodwarmer-4.png']
+      images: ['assets/img/foodwarmer-1.png', 'assets/img/foodwarmer-2.png', 'assets/img/foodwarmer-3.png', 'assets/img/foodwarmer-4.png']
     },
   ];
 
@@ -131,7 +131,7 @@
     const hasImgs = p.images && p.images.length;
     return `
       <article class="product-card reveal">
-        <a class="product-media" style="background:${hasImgs ? '#fff' : p.hue}" href="/product.html?id=${p.id}" aria-label="${p.name}">
+        <a class="product-media" style="background:${hasImgs ? '#fff' : p.hue}" href="product.html?id=${p.id}" aria-label="${p.name}">
           ${tag}
           ${hasImgs
             ? `<img src="${p.images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">`
@@ -140,7 +140,7 @@
         </a>
         <div class="product-info">
           <span class="product-cat">${p.cat}</span>
-          <h3 class="product-name"><a href="/product.html?id=${p.id}">${p.name}</a></h3>
+          <h3 class="product-name"><a href="product.html?id=${p.id}">${p.name}</a></h3>
           <div class="product-price">${price}</div>
           <button class="add-btn" data-add="${p.id}">Añadir al carrito</button>
         </div>

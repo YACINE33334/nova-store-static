@@ -119,7 +119,7 @@
       <div style="max-width:480px;margin:80px auto;text-align:center">
         <h1 style="font-size:22px;margin-bottom:8px">المنتج غير موجود</h1>
         <p style="color:var(--ink-soft);margin-bottom:20px">لم نتمكن من العثور على المنتج المطلوب.</p>
-        <a class="btn btn-primary" href="/admin#products">العودة للمنتجات</a>
+        <a class="btn btn-primary" href="index.html#products">العودة للمنتجات</a>
       </div>`;
   }
 
@@ -478,7 +478,7 @@
     const pvBtn = $('#ed-i18n-preview');
     if (pvBtn) {
       const pid = new URLSearchParams(location.search).get('id');
-      pvBtn.href = '/order.html' + (pid ? '?id=' + encodeURIComponent(pid) + '&qty=1' : '');
+      pvBtn.href = '../order.html' + (pid ? '?id=' + encodeURIComponent(pid) + '&qty=1' : '');
     }
 
     fetch('/api/i18n', { cache: 'no-store' })
@@ -520,7 +520,7 @@
     const previewLink = $('#ed-preview');
     $('#ed-title').textContent = 'إضافة صفحة هبوط جديدة';
     $('#ed-code-id').textContent = 'لم تُنشأ بعد';
-    previewLink.href = '/product.html';
+    previewLink.href = '../product.html';
     const resetBtn = $('#ed-reset');
     if (resetBtn) resetBtn.style.display = 'none';
 
@@ -712,17 +712,17 @@
         const created = await apiSaveProduct(body);
         const trCount = await saveI18N(false).catch(() => null);
         const nid = Number(created.id);
-        history.replaceState(null, '', '/admin/product-editor.html?id=' + nid);
+        history.replaceState(null, '', 'product-editor.html?id=' + nid);
         $('#ed-title').textContent = 'تعديل صفحة الهبوط — ' + r.name;
         $('#ed-code-id').textContent = nid;
-        previewLink.href = '/product.html?id=' + nid;
+        previewLink.href = '../product.html?id=' + nid;
         const resetBtn2 = $('#ed-reset');
         if (resetBtn2) resetBtn2.style.display = '';
         toast(trCount ? 'تم إنشاء الصفحة وحفظ ' + trCount + ' ترجمة' : 'تم إنشاء صفحة الهبوط — يمكنك مواصلة التعديل');
         const saved = await apiGetProduct(nid);
         if (saved && saved.id) {
           data.name = saved.name;
-          window.location.href = '/admin/product-editor.html?id=' + nid + '&saved=1';
+          window.location.href = 'product-editor.html?id=' + nid + '&saved=1';
         }
       } catch (e) {
         toast('تعذر الإنشاء: ' + e.message);
@@ -747,7 +747,7 @@
       const previewLink = $('#ed-preview');
       $('#ed-title').textContent = 'تعديل صفحة الهبوط — ' + product.name;
       $('#ed-code-id').textContent = id;
-      previewLink.href = '/product.html?id=' + id;
+      previewLink.href = '../product.html?id=' + id;
 
       const landing = product.landing || {};
       const data = Object.assign({}, product, {
@@ -991,7 +991,7 @@
           const trCount = await saveI18N(false).catch(() => null);
           toast(trCount ? 'تم حفظ صفحة الهبوط و' + trCount + ' ترجمة — افتح المتجر لمشاهدة التغيير' : 'تم حفظ صفحة الهبوط — افتح المتجر لمشاهدة التغيير', 'success');
           updateI18nBadge();
-          previewLink.href = '/product.html?id=' + id + '&v=' + Date.now();
+          previewLink.href = '../product.html?id=' + id + '&v=' + Date.now();
         } catch (e) {
           toast('تعذر الحفظ: ' + e.message);
         }
