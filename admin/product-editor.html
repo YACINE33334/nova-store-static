@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ØªØ¹Ø¯ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ· â€” NOVA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23008060'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='800' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/css/admin.css?v=12" />
+  <link rel="stylesheet" href="/admin/assets/css/editor.css?v=21" />
+</head>
+<body>
+  <div class="ed-topbar">
+    <a href="/admin#products" class="ed-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+      Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„Ù…Ù†ØªØ¬Ø§Øª
+    </a>
+    <div class="ed-title" id="ed-title">ØªØ¹Ø¯ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ·</div>
+    <div class="ed-topbar-actions">
+      <button class="btn btn-secondary btn-sm" id="ed-reset">Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ</button>
+      <a class="btn btn-secondary btn-sm" id="ed-preview" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        Ù…Ø¹Ø§ÙŠÙ†Ø© Ø§Ù„ØµÙØ­Ø©</a>
+      <button class="btn btn-primary btn-sm" id="ed-save">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        Ø­ÙØ¸</button>
+    </div>
+  </div>
+
+  <main class="ed-main">
+    <div class="ed-form card" id="ed-form">
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„Ø­Ø§Ù„Ø©</h3>
+          <p>Ù†Ø´Ø± ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ· Ø£Ùˆ Ø¥Ø®ÙØ§Ø¤Ù‡Ø§ Ù…Ù† Ø§Ù„Ù…ØªØ¬Ø±</p>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tt">Ù…Ø¹Ø±ÙˆØ¶ Ø¹Ù„Ù‰ Ø§Ù„Ù…ØªØ¬Ø±</div>
+            <div class="ts">Ø¹Ù†Ø¯ Ø§Ù„ØªÙØ¹ÙŠÙ„ ØªØ¸Ù‡Ø± Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø© Ù„Ù„Ø²ÙˆØ§Ø± Ø¨Ù…Ø¹Ø±Ù‘ÙÙ‡Ø§</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="f-active" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ©</h3>
+          <p>Ø§Ù„Ø§Ø³Ù…ØŒ Ø§Ù„Ø³Ø¹Ø±ØŒ Ø§Ù„Ù…Ø®Ø²ÙˆÙ† ÙˆØ´Ø§Ø±Ø© Ø§Ù„Ù…Ù†ØªØ¬</p>
+        </div>
+        <div class="ed-grid-2">
+          <div class="form-group">
+            <label class="form-label">Ø§Ø³Ù… Ø§Ù„Ù…Ù†ØªØ¬</label>
+            <input class="input" id="f-name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„ØªØµÙ†ÙŠÙ</label>
+            <input class="input" id="f-cat" list="pf-cats" placeholder="Apparel, Home ..." />
+            <datalist id="pf-cats"><option>Apparel</option><option>Outerwear</option><option>Home</option><option>Furniture</option><option>Accessories</option><option>Lighting</option><option>Kitchen</option><option>Tools</option></datalist>
+          </div>
+        </div>
+        <div class="ed-grid-2">
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ Ù„ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ·</label>
+            <input class="input" id="f-headline" placeholder="Ù…Ø«Ø§Ù„: Ù‚Ù…ÙŠØµ Ø§Ù„ÙƒØªØ§Ù† Ø§Ù„Ù…Ø«Ø§Ù„ÙŠ" />
+          </div>
+        </div>
+        <div class="ed-grid-3">
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„Ø³Ø¹Ø± ($)</label>
+            <input class="input" id="f-price" type="number" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ù‚Ø¯ÙŠÙ… ($ â€” Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</label>
+            <input class="input" id="f-old" type="number" min="0" step="0.01" placeholder="Ø¨Ù„Ø§ ØªØ®ÙÙŠØ¶" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„Ø´Ø§Ø±Ø©</label>
+            <select class="select-full" id="f-tag">
+              <option value="">Ø¨Ù„Ø§</option>
+              <option value="new">Ø¬Ø¯ÙŠØ¯</option>
+              <option value="sale">ØªØ®ÙÙŠØ¶</option>
+            </select>
+          </div>
+        </div>
+        <div class="ed-grid-2">
+          <div class="form-group">
+            <label class="form-label">Ø§Ù„Ù…Ø®Ø²ÙˆÙ†</label>
+            <input class="input" id="f-stock" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ù„ÙˆÙ† Ø§Ù„Ø®Ù„ÙÙŠØ©</label>
+            <input class="input" id="f-hue" type="color" style="height:44px;padding:4px" />
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„ØµÙˆØ±</h3>
+          <p>Ø±ÙˆØ§Ø¨Ø· ØµÙˆØ± Ø§Ù„Ù…Ù†ØªØ¬ Ø§Ù„ØªÙŠ ØªØ¸Ù‡Ø± ÙÙŠ Ø§Ù„Ù…Ø¹Ø±Ø¶ (ÙŠÙ…ÙƒÙ† Ø¥Ø¶Ø§ÙØ© Ø¹Ø¯Ø© ØµÙˆØ± â€” Ø§Ù„Ø£ÙˆÙ„Ù‰ Ù‡ÙŠ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©)</p>
+        </div>
+        <div id="ed-images"><!-- dynamic image rows --></div>
+        <button class="btn btn-secondary btn-sm" id="ed-img-add" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Ø¥Ø¶Ø§ÙØ© ØµÙˆØ±Ø©
+        </button>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ù…Ù†ØªØ¬ (SKU / Material / Origen)</h3>
+          <p>ØªØ¸Ù‡Ø± ÙÙŠ Ø´Ø±ÙŠØ· Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø£Ø³ÙÙ„ ÙˆØµÙ Ø§Ù„Ù…Ù†ØªØ¬ ÙÙŠ Ø§Ù„ØµÙØ­Ø©</p>
+        </div>
+        <div class="ed-grid-3">
+          <div class="form-group"><label class="form-label">SKU</label><input class="input" id="f-sku" placeholder="NV-0010" /></div>
+          <div class="form-group"><label class="form-label">Material</label><input class="input" id="f-material" placeholder="Grado premium" /></div>
+          <div class="form-group"><label class="form-label">Origen</label><input class="input" id="f-origen" placeholder="Hecho en la UE" /></div>
+        </div>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„Ø¥Ø«Ø¨Ø§Øª Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ</h3>
+          <p>Ø§Ù„ØªÙ‚ÙŠÙŠÙ… ÙˆØ¹Ø¯Ø¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø§Øª ÙˆØ§Ù„Ù…Ø¨ÙŠØ¹Ø§Øª ÙˆØ³Ø·Ø± Â«Ø£Ø¯Ù†Ù‰ Ø³Ø¹Ø± ÙÙŠ Ø¢Ø®Ø± 30 ÙŠÙˆÙ…Ø§Ù‹Â»</p>
+        </div>
+        <div class="ed-grid-3">
+          <div class="form-group"><label class="form-label">Ø§Ù„ØªÙ‚ÙŠÙŠÙ… (0-5)</label><input class="input" id="f-rating" type="number" min="0" max="5" step="0.1" /></div>
+          <div class="form-group"><label class="form-label">Ø¹Ø¯Ø¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø§Øª</label><input class="input" id="f-reviews-count" type="number" min="0" /></div>
+          <div class="form-group"><label class="form-label">Ø§Ù„Ù…Ø¨ÙŠØ¹Ø§Øª (vendidos)</label><input class="input" id="f-sold" type="number" min="0" /></div>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tt">Ø£Ø¯Ù†Ù‰ Ø³Ø¹Ø± ÙÙŠ Ø¢Ø®Ø± 30 ÙŠÙˆÙ…Ø§Ù‹</div>
+            <div class="ts">Ø¥Ø¸Ù‡Ø§Ø± Ø³Ø·Ø± Â«Precio mÃ¡s bajo en los Ãºltimos 30 dÃ­asÂ»</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="f-low30" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="ed-section" id="ed-reviews-sec">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø§Øª</h3>
+          <p>Ù…Ø±Ø§Ø¬Ø¹Ø§Øª Ø®Ø§ØµØ© Ø¨Ù‡Ø°Ø§ Ø§Ù„Ù…Ù†ØªØ¬ ØªØ¸Ù‡Ø± ÙÙŠ Ù‚Ø³Ù… Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø§Øª. Ø¹Ù†Ø¯ Ø¥Ø¶Ø§ÙØ© Ø£ÙŠ Ù…Ø±Ø§Ø¬Ø¹Ø©ØŒ ØªÙØ³ØªØ®Ø¯Ù… Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø§Øª Ø¨Ø¯Ù„Ø§Ù‹ Ù…Ù† Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¹Ø§Ù…Ø©.</p>
+        </div>
+        <div id="ed-reviews"><!-- dynamic review blocks --></div>
+        <button class="btn btn-secondary btn-sm" id="ed-review-add" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Ø¥Ø¶Ø§ÙØ© Ù…Ø±Ø§Ø¬Ø¹Ø©
+        </button>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ù…Ø­ØªÙˆÙ‰ Ø§Ù„ØµÙØ­Ø©</h3>
+          <p>Ø§Ù„Ù†Øµ Ø§Ù„ØªØ±ÙˆÙŠØ¬ÙŠ ÙˆÙˆØµÙ Ø§Ù„Ù…Ù†ØªØ¬</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ø§Ù„Ø³Ø·Ø± Ø§Ù„ØªØ±ÙˆÙŠØ¬ÙŠ (ÙŠØ¸Ù‡Ø± ØªØ­Øª Ø§Ù„Ø¹Ù†ÙˆØ§Ù†)</label>
+          <input class="input" id="f-lead" placeholder="Ø¬Ù…Ù„Ø© Ù‚ØµÙŠØ±Ø© ØªØ³ÙˆÙ‘Ù‚ Ø§Ù„Ù…Ù†ØªØ¬" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">ÙˆØµÙ Ø§Ù„Ù…Ù†ØªØ¬ (Ù…Ø­Ø±Ø± Ù†ØµÙˆØµ ØºÙ†ÙŠØ©)</label>
+          <div class="ed-rt">
+            <div class="ed-rt-toolbar">
+              <button type="button" class="ed-rt-btn" data-cmd="bold" title="Ø¹Ø±ÙŠØ¶"><b>B</b></button>
+              <button type="button" class="ed-rt-btn" data-cmd="italic" title="Ù…Ø§Ø¦Ù„"><i>I</i></button>
+              <button type="button" class="ed-rt-btn" data-cmd="underline" title="ØªØ³Ø·ÙŠØ±"><u>U</u></button>
+              <button type="button" class="ed-rt-btn" data-cmd="strikeThrough" title="Ø´Ø·Ø¨"><s>S</s></button>
+              <span class="ed-rt-sep"></span>
+              <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="h3" title="Ø¹Ù†ÙˆØ§Ù†"><span class="ed-rt-h-mark">H</span></button>
+              <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="blockquote" title="Ø§Ù‚ØªØ¨Ø§Ø³">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6H6a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2v1a3 3 0 0 1-3 3H5"/><path d="M21 6h-3a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2v1a3 3 0 0 1-3 3"/></svg>
+              </button>
+              <button type="button" class="ed-rt-btn" data-cmd="insertUnorderedList" title="Ù‚Ø§Ø¦Ù…Ø© Ù†Ù‚Ø·ÙŠØ©">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
+              </button>
+              <button type="button" class="ed-rt-btn" data-cmd="insertOrderedList" title="Ù‚Ø§Ø¦Ù…Ø© Ù…Ø±Ù‚Ù…Ø©">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h9M12 12h9M12 18h9"/><text x="2" y="9" font-size="7" fill="currentColor" stroke="none" font-family="inherit">1</text><text x="2" y="15" font-size="7" fill="currentColor" stroke="none" font-family="inherit">2</text><text x="2" y="21" font-size="7" fill="currentColor" stroke="none" font-family="inherit">3</text></svg>
+              </button>
+              <span class="ed-rt-sep"></span>
+              <button type="button" class="ed-rt-btn" data-cmd="createLink" title="Ø¥Ø¯Ø±Ø§Ø¬ Ø±Ø§Ø¨Ø·">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L12.1 5.43"/><path d="M14 10a5 5 0 0 0-7.07 0L4.1 12.83a5 5 0 0 0 7.07 7.07l1.73-1.73"/></svg>
+              </button>
+              <button type="button" class="ed-rt-btn" data-cmd="unlink" title="Ø¥Ø²Ø§Ù„Ø© Ø§Ù„Ø±Ø§Ø¨Ø·">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.73 1.73"/><path d="M14 10a5 5 0 0 0-7.07 0L4.1 12.83a5 5 0 0 0 7.07 7.07l1.73-1.73"/><path d="M4 4l16 16"/></svg>
+              </button>
+              <label class="ed-rt-btn ed-rt-upload" data-cmd="uploadImage" title="Ø¥Ø¶Ø§ÙØ© ØµÙˆØ±Ø© Ù…Ù† Ø§Ù„Ø¬Ù‡Ø§Ø²">
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 19 5-5 3 3 3-3 5 5"/></svg>
+              </label>
+            </div>
+            <div class="ed-rt-area" id="f-desc-rt" contenteditable="true" dir="ltr"
+              data-placeholder="Ø§ÙƒØªØ¨ ÙˆØµÙ Ø§Ù„Ù…Ù†ØªØ¬ Ù‡Ù†Ø§... (ÙŠØ¯Ø¹Ù… Ø§Ù„Ø¹Ø±ÙŠØ¶ØŒ Ø§Ù„Ù‚ÙˆØ§Ø¦Ù…ØŒ Ø§Ù„Ø±ÙˆØ§Ø¨Ø· ÙˆØ§Ù„ØµÙˆØ±)"></div>
+            <div class="ed-rt-hint">ØªÙ†Ø³ÙŠÙ‚ Ù†Øµ + Ø¥Ø¯Ø±Ø§Ø¬ Ø±ÙˆØ§Ø¨Ø· ÙˆØµÙˆØ± (WYSIWYG).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø§Ù„Ù…Ù…ÙŠØ²Ø§Øª</h3>
+          <p>Ù†Ù‚Ø§Ø· ØªØ¸Ù‡Ø± ÙÙŠ Ù‚Ø³Ù… Â«Considered detailsÂ»</p>
+        </div>
+        <div id="ed-feats"><!-- dynamic rows --></div>
+        <button class="btn btn-secondary btn-sm" id="ed-feat-add" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Ø¥Ø¶Ø§ÙØ© Ù…ÙŠØ²Ø©
+        </button>
+      </div>
+
+      <div class="ed-section">
+        <div class="ed-section-head">
+          <h3>Ø¯Ø¹ÙˆØ© Ù„Ø§ØªØ®Ø§Ø° Ø¥Ø¬Ø±Ø§Ø¡</h3>
+          <p>Ù†Øµ Ø²Ø± Ø§Ù„Ø¥Ø¶Ø§ÙØ© (ÙŠØ¸Ù‡Ø± Ù„Ù„Ø²Ø§Ø¦Ø±)</p>
+        </div>
+        <div class="ed-grid-2">
+          <div class="form-group">
+            <label class="form-label">Ù†Øµ Ø§Ù„Ø²Ø±</label>
+            <input class="input" id="f-cta" value="Buy Now" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ø±Ø§Ø¨Ø· Ø§Ù„Ø²Ø±</label>
+            <input class="input" id="f-cta-link" value="#add" placeholder="#add" />
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-section" id="ed-i18n-sec">
+        <div class="ed-section-head">
+          <h3>ØªØ±Ø¬Ù…Ø© Ù†Ù…ÙˆØ°Ø¬ Ø§Ù„Ø·Ù„Ø¨</h3>
+          <p>Ù†Ø³Ø®Ø© Ù…Ø·Ø§Ø¨Ù‚Ø© Ù„Ù†Ù…ÙˆØ°Ø¬ Ù…Ù„Ø¡ Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø°ÙŠ ÙŠØ±Ø§Ù‡ Ø§Ù„Ø²Ø¨ÙˆÙ† (Ø§Ù„Ø¥Ø³Ø¨Ø§Ù†ÙŠØ© Ù‡ÙŠ Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠØ©). Ø§ÙƒØªØ¨ Ø§Ù„ØªØ±Ø¬Ù…Ø© Ù…ÙƒØ§Ù† ÙƒÙ„ Ù†Øµ â€” Ø£ÙŠ Ù†Øµ ØªØªØ±ÙƒÙ‡ ÙƒÙ…Ø§ Ù‡Ùˆ ÙŠØ¨Ù‚Ù‰ Ø¨Ø§Ù„Ø¥Ø³Ø¨Ø§Ù†ÙŠØ©.</p>
+        </div>
+        <div id="ed-i18n"><!-- dynamic translation rows --></div>
+<div class="ed-i18n-actions">
+          <a class="btn btn-secondary btn-sm" id="ed-i18n-preview" href="/order.html" target="_blank" rel="noopener">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+            Ù…Ø¹Ø§ÙŠÙ†Ø© ØµÙØ­Ø© Ø§Ù„Ø·Ù„Ø¨
+          </a>
+          <button class="btn btn-secondary btn-sm" id="ed-i18n-clear" type="button">Ø¥ÙØ±Ø§Øº Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ù…ØªØ±Ø¬Ù…Ø© (Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„Ø¥Ø³Ø¨Ø§Ù†ÙŠØ©)</button>
+          <button class="btn btn-primary btn-sm" id="ed-i18n-save" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            Ø­ÙØ¸ Ø§Ù„ØªØ±Ø¬Ù…Ø§Øª <span class="ed-i18n-badge" id="ed-i18n-badge" hidden>0</span>
+          </button>
+          <p class="ed-i18n-note">Ø²Ø± Â«Ø­ÙØ¸Â» Ø§Ù„Ø£Ø®Ø¶Ø± Ø£Ø¹Ù„Ù‰ Ø§Ù„ØµÙØ­Ø© ÙŠØ­ÙØ¸ Ø§Ù„Ø¢Ù† Ø§Ù„ØªØ±Ø¬Ù…Ø§Øª Ø£ÙŠØ¶Ø§Ù‹ Ù…Ø¹ ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ·.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live preview -->
+    <aside class="ed-preview-wrap">
+      <div class="ed-preview-head">Ù…Ø¹Ø§ÙŠÙ†Ø© Ù…Ø¨Ø§Ø´Ø±Ø©</div>
+      <div class="ed-preview" id="ed-preview-frame">
+        <div class="edp-hero">
+          <span class="edp-eyebrow" id="pv-cat">â€”</span>
+          <h1 id="pv-headline">â€”</h1>
+          <div class="edp-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <div class="edp-revcount" id="pv-revcount"></div>
+          <div class="edp-price" id="pv-price"></div>
+          <p class="edp-lead" id="pv-lead"></p>
+          <p class="edp-desc" id="pv-desc"></p>
+          <div class="edp-meta" id="pv-meta"></div>
+          <ul class="edp-feats" id="pv-feats"></ul>
+          <button class="btn btn-primary" id="pv-cta">Buy Now</button>
+        </div>
+      </div>
+      <p class="ed-hint">Ø§Ù„Ø¶ØºØ· Ø¹Ù„Ù‰ Â«Ø­ÙØ¸Â» ÙŠØ­Ø¯Ù‘Ø« ØµÙØ­Ø© Ø§Ù„Ù‡Ø¨ÙˆØ· Ù…Ø¨Ø§Ø´Ø±Ø© Ø¹Ù„Ù‰ <code>/product.html?id=<span id="ed-code-id">..</span></code></p>
+    </aside>
+  </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/nova-supabase.js"></script>
+  <script src="/assets/js/api.js"></script>
+<script src="/assets/js/currency.js?v=1"></script>
+<script src="/assets/js/store.js?v=10"></script>
+<script src="/assets/js/checkout-i18n.js?v=2"></script>
+<script src="/admin/assets/js/editor.js?v=23"></script>
+</body>
+</html>

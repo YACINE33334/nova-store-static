@@ -1,0 +1,14 @@
+# Node / server (removed — static architecture)
+node_modules/
+server/
+
+# Secrets — NEVER commit
+.env
+.env.*
+
+# Local data archive (migrated to Supabase)
+data/*.json
+
+# Deploy artifacts / logs
+_site/
+*.log
