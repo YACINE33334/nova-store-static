@@ -480,6 +480,9 @@
       var url = '', m = '', useShim = false, native = null;
       var headerMap = {};
       var _status = 0, _responseText = '';
+      ['onloadstart', 'onprogress', 'onabort', 'onerror', 'onload', 'ontimeout', 'onloadend', 'onreadystatechange'].forEach(function (ev) {
+        Object.defineProperty(this, ev, { writable: true, configurable: true, value: null });
+      }, this);
 
       this.open = function (mm, uu) {
         m = mm; url = String(uu || '');

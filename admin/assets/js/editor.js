@@ -88,6 +88,7 @@
           xhr.send(file);
         } catch (err) {
           label.classList.remove('busy');
+          console.error('[editor] upload failed to start:', err);
           toast('تعذر بدء الرفع');
         }
       });
@@ -238,7 +239,8 @@
               e.target.value = '';
             } catch (err) {
               btn.classList.remove('busy');
-              toast('تعذر بدء الرفع');
+              console.error('[editor] upload failed to start:', err);
+          toast('تعذر بدء الرفع');
             }
           });
           row.querySelector('.ed-img-del').addEventListener('click', () => {
@@ -619,6 +621,7 @@
           e.target.value = '';
         } catch (err) {
           btn.classList.remove('busy');
+          console.error('[editor] upload failed to start:', err);
           toast('تعذر بدء الرفع');
         }
       });
@@ -903,7 +906,8 @@
             e.target.value = '';
           } catch (err) {
             btn.classList.remove('busy');
-            toast('تعذر بدء الرفع');
+            console.error('[editor] upload failed to start:', err);
+          toast('تعذر بدء الرفع');
           }
         });
         row.querySelector('.ed-img-del').addEventListener('click', () => {
