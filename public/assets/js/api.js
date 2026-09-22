@@ -501,11 +501,24 @@
       this.send = function (data) {
         if (!useShim) { native.send(data); return; }
         var ct = headerMap['Content-Type'] || 'application/octet-stream';
+        var settled = false, timer = null;
+        var finish = function () { if (timer) clearTimeout(timer); };
+        timer = setTimeout(function () {
+          if (settled) return;
+          settled = true;
+          _status = 0;
+          _responseText = '';
+          if (self.onerror) self.onerror.call(self);
+        }, 60000);
         NS.uploadBytes(data, ct).then(function (u) {
+          if (settled) return;
+          settled = true; finish();
           _status = 201;
           _responseText = JSON.stringify({ url: u, size: (data && data.size) || (data && data.byteLength) || 0, type: ct });
           if (self.onload) self.onload.call(self);
         }).catch(function (e) {
+          if (settled) return;
+          settled = true; finish();
           _status = 500;
           _responseText = JSON.stringify({ error: e && e.message ? e.message : 'Upload failed' });
           if (self.onload) self.onload.call(self);

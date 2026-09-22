@@ -114,6 +114,14 @@
       .replace(/"/g, '&quot;');
   }
 
+  function removeStoredImage(src) {
+    try {
+      if (window.NovaSupabase && typeof window.NovaSupabase.deleteObject === 'function') {
+        window.NovaSupabase.deleteObject(src).catch(function () {});
+      }
+    } catch (e) { /* non-fatal */ }
+  }
+
   function renderNotFound() {
     document.body.innerHTML = `
       <div style="max-width:480px;margin:80px auto;text-align:center">
@@ -198,6 +206,7 @@
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             const btn = row.querySelector('.ed-img-upload');
+            const prev = row.querySelector('.ed-img-input').value;
             btn.classList.add('busy');
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/upload');
@@ -207,7 +216,10 @@
               if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                   const r = JSON.parse(xhr.responseText);
-                  if (r.url) { row.querySelector('.ed-img-input').value = r.url; rv.imgs[ii] = r.url; }
+                  if (r.url) {
+                    row.querySelector('.ed-img-input').value = r.url; rv.imgs[ii] = r.url;
+                    if (prev && prev !== r.url) removeStoredImage(prev);
+                  }
                   else { toast('خطأ: ' + (r.error || '')); }
                 } catch (err) { toast('استجابة غير صالحة'); }
               } else {
@@ -220,6 +232,7 @@
             e.target.value = '';
           });
           row.querySelector('.ed-img-del').addEventListener('click', () => {
+            removeStoredImage(rv.imgs[ii]);
             rv.imgs.splice(ii, 1);
             renderRvImgRows();
           });
@@ -568,6 +581,7 @@
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         const btn = row.querySelector('.ed-img-upload');
+        const prev = input.value;
         btn.classList.add('busy');
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/upload');
@@ -581,6 +595,7 @@
                 input.value = r.url;
                 data.images[index] = r.url;
                 refreshPreview();
+                if (prev && prev !== r.url) removeStoredImage(prev);
               } else { toast('خطأ: ' + (r.error || '')); }
             } catch (err) { toast('استجابة غير صالحة'); }
           } else {
@@ -593,6 +608,7 @@
         e.target.value = '';
       });
       row.querySelector('.ed-img-del').addEventListener('click', () => {
+        removeStoredImage(data.images[index]);
         data.images.splice(index, 1);
         renderImageRows();
         refreshPreview();
@@ -844,6 +860,7 @@
           const file = e.target.files && e.target.files[0];
           if (!file) return;
           const btn = row.querySelector('.ed-img-upload');
+          const prev = input.value;
           btn.classList.add('busy');
           const xhr = new XMLHttpRequest();
           xhr.open('POST', '/api/upload');
@@ -856,6 +873,7 @@
                 if (r.url) {
                   input.value = r.url;
                   data.images[index] = r.url;
+                  if (prev && prev !== r.url) removeStoredImage(prev);
                 } else { toast('خطأ: ' + (r.error || ''));
                 }
               } catch (err) { toast('استجابة غير صالحة'); }
@@ -869,6 +887,7 @@
           e.target.value = '';
         });
         row.querySelector('.ed-img-del').addEventListener('click', () => {
+          removeStoredImage(data.images[index]);
           data.images.splice(index, 1);
           renderImageRows();
         });

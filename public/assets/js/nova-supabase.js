@@ -79,20 +79,58 @@
     if (d && d.error) return String(d.error);
     return fallback || 'error';
   }
+  /* Uploads time out instead of spinning forever (e.g. storage policy
+     rejects the insert for a non-admin session). */
+  var UPLOAD_TIMEOUT_MS = 60000;
+  function withTimeout() {
+    var ctl = null, timer = null;
+    if (window.AbortController) {
+      ctl = new AbortController();
+      timer = setTimeout(function () { ctl.abort(); }, UPLOAD_TIMEOUT_MS);
+    }
+    return {
+      signal: ctl ? ctl.signal : null,
+      clear: function () { if (timer) clearTimeout(timer); },
+    };
+  }
   function uploadBytes(body, contentType) {
     return refreshSession().then(function () {
       var path = newPath(EXT[contentType] || '');
-      return fetch(STORAGE + '/object/' + BUCKET + '/' + path, {
+      var t = withTimeout();
+      var init = {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': contentType }),
         body: body,
-      }).then(function (r) {
+      };
+      if (t.signal) init.signal = t.signal;
+      return fetch(STORAGE + '/object/' + BUCKET + '/' + path, init).then(function (r) {
+        t.clear();
         if (r.status >= 200 && r.status < 300) return publicUrl(path);
         return r.json().then(function (d) {
           throw new Error(errText(d, 'Upload failed (' + r.status + ')'));
         });
+      }).catch(function (e) {
+        t.clear();
+        if (e && e.name === 'AbortError') throw new Error('Upload timed out');
+        throw e;
       });
     });
+  }
+  function storagePathFromUrl(url) {
+    var m = /\/(?:object\/public\/)?product-images\/(.+)$/.exec(String(url || ''));
+    return m ? m[1] : null;
+  }
+  function deleteObject(pathOrUrl) {
+    var path = storagePathFromUrl(pathOrUrl) || pathOrUrl;
+    if (!path) return Promise.resolve(false);
+    return refreshSession().then(function () {
+      return fetch(STORAGE + '/object/' + BUCKET + '/' + encodeURI(path), {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }).then(function (r) {
+        return r.status >= 200 && r.status < 300;
+      });
+    }).catch(function () { return false; });
   }
   function uploadDataUrl(dataUrl) {
     var m = /^data:([^;,]+)/.exec(dataUrl);
@@ -138,5 +176,7 @@
     uploadDataUrl: uploadDataUrl,
     walkAndUpload: walkAndUpload,
     publicUrl: publicUrl,
+    storagePathFromUrl: storagePathFromUrl,
+    deleteObject: deleteObject,
   };
 })();
