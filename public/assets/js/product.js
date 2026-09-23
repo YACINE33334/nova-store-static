@@ -26,9 +26,12 @@
 
   function sanitizeRich(html) {
     if (!html) return '';
-    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code']);
-    const doc = new DOMParser().parseFromString(decodeEntitiesOnce(html), 'text/html');
-    (doc.body.querySelectorAll('*') || []).forEach((node) => {
+    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code', 'style', 'svg', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'g', 'defs', 'lineargradient', 'stop', 'use']);
+    const allAttrs = new Set(['class', 'style', 'id', 'title', 'dir', 'align', 'width', 'height', 'alt', 'loading', 'target', 'rel', 'href', 'src', 'valign', 'colspan', 'rowspan', 'scope', 'border', 'cellpadding', 'cellspacing', 'bgcolor', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'fill-rule', 'clip-rule', 'opacity', 'transform', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'dx', 'dy', 'points', 'viewBox', 'offset', 'stop-color', 'stop-opacity', 'gradientunits']);
+    const permHost = /^(https?:)?\/\//i;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = decodeEntitiesOnce(html);
+    (wrap.querySelectorAll('*') || []).forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (!allowed.has(tag)) {
         node.replaceWith(...Array.from(node.childNodes));
@@ -46,7 +49,7 @@
       }
       if (tag === 'img') {
         const src = node.getAttribute('src') || '';
-        if (!/^(https?:)?\/\//i.test(src) && !src.startsWith('/')) {
+        if (!permHost.test(src) && !src.startsWith('/')) {
           node.removeAttribute('src');
         } else {
           node.setAttribute('src', src);
@@ -54,12 +57,20 @@
           node.setAttribute('style', 'max-width:100%;border-radius:10px;');
         }
       }
-      if (tag === 'li') return;
+      if (tag === 'use') {
+        const ref = node.getAttribute('href') || node.getAttribute('xlink:href') || '';
+        if (ref && !ref.startsWith('#')) node.removeAttribute('href');
+      }
       for (const attr of Array.from(node.attributes)) {
-        if (attr.name !== 'href' && attr.name !== 'src' && attr.name !== 'style' && attr.name !== 'target' && attr.name !== 'rel' && attr.name !== 'alt' && attr.name !== 'loading') node.removeAttribute(attr.name);
+        const name = attr.name.toLowerCase();
+        if (name.startsWith('on') || name.startsWith('xlink:')) {
+          node.removeAttribute(attr.name);
+          continue;
+        }
+        if (name !== 'href' && name !== 'src' && !allAttrs.has(name)) node.removeAttribute(attr.name);
       }
     });
-    return doc.body.innerHTML;
+    return wrap.innerHTML;
   }
 
   const productIcon = (hue, size) => `
