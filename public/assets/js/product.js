@@ -14,10 +14,20 @@
 
   // Whitelist sanitizer for rich-text product descriptions (renders the safe
   // subset produced by the WYSIWYG editor; strips anything else).
+  // Descriptions may arrive with HTML entities escaped one level (the editor
+  // stores innerHTML of its rich area) — decode once so escaped tags become
+  // real elements before sanitizing.
+  function decodeEntitiesOnce(str) {
+    if (!str) return '';
+    const holder = document.createElement('textarea');
+    holder.innerHTML = str;
+    return holder.value;
+  }
+
   function sanitizeRich(html) {
     if (!html) return '';
     const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code']);
-    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const doc = new DOMParser().parseFromString(decodeEntitiesOnce(html), 'text/html');
     (doc.body.querySelectorAll('*') || []).forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (!allowed.has(tag)) {
