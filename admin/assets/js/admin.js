@@ -1537,11 +1537,19 @@
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ التغييرات</button></div>
       `,
       pixel: `
-        <h3 class="card-title" style="margin-bottom:18px">تتبع فيسبوك (Meta Pixel)</h3>
-        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">ألصق معرّف البكسل (Facebook Pixel ID) ليفعّل المتجر التتبع تلقائيًا: تصفح الصفحات، مشاهدة المنتج، إضافة للسلة، بدء الدفع، والشراء. تظهر البيانات في منصة Meta Events Manager.</p>
+        <h3 class="card-title" style="margin-bottom:18px">Facebook Conversions API</h3>
+        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">أعدّل أحداث المتجر (تصفح، مشاهدة منتج، إضافة للسلة، بدء الدفع، شراء) مباشرةً إلى Meta عبر Conversions API وPixel. للحصول على البيانات: أدخل اسم البكسل، المعرّف، رمز الوصول، ورمز الاختبار من إدارة الأحداث (Events Manager).</p>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">اسم البكسل</label><input class="input" id="set-fb-pixel-name" dir="ltr" placeholder="مثال: Chief Store" /></div>
+          <div class="form-group"><label class="form-label">معرّف البكسل</label><input class="input" id="set-fb-pixel" dir="ltr" placeholder="مثال: 123456789012345" /></div>
+        </div>
         <div class="form-group">
-          <label class="form-label">معرّف بكسل فيسبوك (Facebook Pixel ID)</label>
-          <input class="input" id="set-fb-pixel" dir="ltr" placeholder="مثال: 123456789012345" />
+          <label class="form-label">رمز الوصول (Access Token)</label>
+          <input class="input" id="set-fb-token" dir="ltr" placeholder="مثال: EAAG... (يُظهر في المتصفح)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">رمز الاختبار (Test Event Code)</label>
+          <input class="input" id="set-fb-test-code" dir="ltr" placeholder="مثال: TEST123456 (اختياري — من أداة Test Events)" />
         </div>
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات البكسل</button></div>
       `,
@@ -1555,6 +1563,9 @@
         if ($('#set-whatsapp')) settings.whatsapp = $('#set-whatsapp').value.trim();
         if ($('#set-currency')) settings.currency = $('#set-currency').value;
         if ($('#set-fb-pixel')) settings.fbPixel = $('#set-fb-pixel').value.trim();
+        if ($('#set-fb-pixel-name')) settings.fbPixelName = $('#set-fb-pixel-name').value.trim();
+        if ($('#set-fb-token')) settings.fbToken = $('#set-fb-token').value.trim();
+        if ($('#set-fb-test-code')) settings.fbTestCode = $('#set-fb-test-code').value.trim();
         fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
           .then(() => toast('تم حفظ الإعدادات', 'success'))
           .catch(() => toast('خطأ في الحفظ'));
@@ -1567,6 +1578,9 @@
           if ($('#set-whatsapp')) $('#set-whatsapp').value = settings.whatsapp || '';
           if ($('#set-currency')) $('#set-currency').value = settings.currency || 'USD';
           if ($('#set-fb-pixel')) $('#set-fb-pixel').value = settings.fbPixel || '';
+          if ($('#set-fb-pixel-name')) $('#set-fb-pixel-name').value = settings.fbPixelName || '';
+          if ($('#set-fb-token')) $('#set-fb-token').value = settings.fbToken || '';
+          if ($('#set-fb-test-code')) $('#set-fb-test-code').value = settings.fbTestCode || '';
         }).catch(() => {});
       }
     }
