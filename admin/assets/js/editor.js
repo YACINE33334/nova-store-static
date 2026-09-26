@@ -48,6 +48,48 @@
     rt.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  function videoTypeFor(url) {
+    const m = /\.(mp4|webm|ogv|ogg|mov)(?:$|[?#])/i.exec(String(url || ''));
+    if (!m) return '';
+    const t = { mp4: 'video/mp4', webm: 'video/webm', ogv: 'video/ogg', ogg: 'video/ogg', mov: 'video/quicktime' }[m[1].toLowerCase()];
+    return t || '';
+  }
+
+  function insertVideoHtml(url) {
+    const rt = $('#f-desc-rt');
+    rt.focus();
+    const sel = window.getSelection();
+    let range = null;
+    if (savedRange) {
+      range = savedRange.cloneRange();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else if (sel.rangeCount) {
+      range = sel.getRangeAt(0);
+    }
+    const vid = document.createElement('video');
+    vid.controls = true;
+    vid.playsInline = true;
+    vid.preload = 'metadata';
+    vid.style.maxWidth = '100%';
+    vid.style.borderRadius = '12px';
+    const src = document.createElement('source');
+    src.src = url;
+    const t = videoTypeFor(url);
+    if (t) src.type = t;
+    vid.appendChild(src);
+    if (range) {
+      range.collapse(false);
+      range.insertNode(vid);
+      range.setStartAfter(vid);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      rt.appendChild(vid);
+    }
+    rt.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   /* ---- Hybrid description editor: Normal (WYSIWYG) <-> HTML (code) ---- */
   let descMode = 'normal';
 
@@ -100,18 +142,70 @@
     refreshDescPreview();
   }
 
-  function insertHtmlImage(url) {
+  function insertHtmlVideo(url) {
     const ta = $('#f-desc-html');
     if (!ta) return;
-    const img = '<img src="' + url + '" alt="" style="max-width:100%;height:auto;border-radius:8px;" />';
+    const t = videoTypeFor(url);
+    const tag = '<video controls playsinline preload="metadata" style="max-width:100%;height:auto;border-radius:12px;">'
+      + '<source src="' + url + '"' + (t ? ' type="' + t + '"' : '') + ' />'
+      + '</video>';
     const start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
     const end = ta.selectionEnd != null ? ta.selectionEnd : start;
-    ta.value = ta.value.slice(0, start) + img + ta.value.slice(end);
-    const np = start + img.length;
+    ta.value = ta.value.slice(0, start) + tag + ta.value.slice(end);
+    const np = start + tag.length;
     ta.focus();
     ta.setSelectionRange(np, np);
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     refreshDescPreview();
+  }
+
+  /* ---- shared uploader: posts raw body to /api/upload (XHR shim →
+       NS.uploadBytes → Supabase Storage) and calls the insert callback ---- */
+  function uploadToDesc(file, opts, onOk) {
+    const label = opts.label;
+    label.classList.add('busy');
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload');
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      xhr.onload = () => {
+        label.classList.remove('busy');
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const r = JSON.parse(xhr.responseText);
+            if (r.url) {
+              onOk(r.url, r.type || file.type || '');
+              if (opts.input) opts.input.value = '';
+            } else {
+              toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
+            }
+          } catch (e) { toast('استجابة غير صالحة من الخادم'); }
+        } else {
+          try {
+            const r = JSON.parse(xhr.responseText);
+            toast('فشل الرفع: ' + (r.error || xhr.status));
+          } catch (e) { toast('فشل الرفع: ' + xhr.status); }
+        }
+      };
+      xhr.onerror = () => {
+        label.classList.remove('busy');
+        toast('تعذر الاتصال بالخادم أثناء الرفع');
+      };
+      xhr.onabort = () => label.classList.remove('busy');
+      xhr.ontimeout = () => {
+        label.classList.remove('busy');
+        toast('انتهت مهلة رفع الملف');
+      };
+      xhr.send(file);
+    } catch (err) {
+      label.classList.remove('busy');
+      console.error('[editor] upload failed to start:', err);
+      toast('تعذر بدء الرفع');
+    }
+  }
+
+  function isVideoFile(f) {
+    return !!f && (/^video\//i.test(f.type) || /\.(mp4|webm|ogv|ogg|mov)$/i.test(f.name || ''));
   }
 
   function bindDescModes() {
@@ -120,12 +214,72 @@
     });
   }
 
+  function selectedVideoIn() {
+    const rt = $('#f-desc-rt');
+    if (!rt) return null;
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return null;
+    const r = sel.getRangeAt(0);
+    if (!rt.contains(r.startContainer) && !rt.contains(r.endContainer)) return null;
+    let node = r.startContainer.nodeType === 3 ? r.startContainer.parentElement : r.startContainer;
+    for (let i = 0; node && i < 6; i++) {
+      if (node.tagName && node.tagName.toLowerCase() === 'video') return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function bindVideoDelete() {
+    const btn = $('#ed-rt-video-del');
+    const rt = $('#f-desc-rt');
+    if (!btn || !rt) return;
+    const update = () => {
+      const v = selectedVideoIn();
+      btn.disabled = !v;
+    };
+    rt.addEventListener('mouseup', update);
+    rt.addEventListener('keyup', update);
+    rt.addEventListener('click', update);
+    rt.addEventListener('focus', update);
+    document.addEventListener('selectionchange', () => { if (document.activeElement === rt) update(); });
+    btn.addEventListener('click', () => {
+      const v = selectedVideoIn();
+      if (!v) return;
+      const src = v.querySelector('source').getAttribute('src') || '';
+      if (src) removeStoredImage(src);
+      v.remove();
+      rt.dispatchEvent(new Event('input', { bubbles: true }));
+      refreshDescPreview();
+      update();
+    });
+  }
+
+  function bindDescPaste() {
+    const rt = $('#f-desc-rt');
+    if (!rt) return;
+    rt.addEventListener('paste', (e) => {
+      const html = e.clipboardData && e.clipboardData.getData ? e.clipboardData.getData('text/html') : '';
+      const txt = e.clipboardData && e.clipboardData.getData ? e.clipboardData.getData('text/plain') : '';
+      if (html && /<video|<iframe/.test(html)) {
+        e.preventDefault();
+        const wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('script, iframe').forEach((n) => n.remove());
+        document.execCommand('insertHTML', false, wrap.innerHTML);
+      } else if (txt && /^https?:\/\/\S+\.(mp4|webm|mov|ogv)([?#]\S*)?$/i.test(txt.trim())) {
+        e.preventDefault();
+        const url = txt.trim();
+        insertVideoHtml(url.split(/[?#]/)[0]);
+      }
+    });
+  }
+
   function refreshDescPreview() {
     const rt = $('#f-desc-rt');
     if (rt) rt.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
-  /* ---- Rich text "upload image from disk" (works in new + edit mode) ---- */
+  /* ---- Rich text "upload image/video from disk" (works in new + edit mode) ---- */
   function bindRichTextUpload() {
     document.querySelectorAll('#ed-rt-panel-normal .ed-rt-upload').forEach((label) => {
       const inp = label.querySelector('input[type=file]');
@@ -134,86 +288,32 @@
       inp.addEventListener('change', () => {
         const file = inp.files && inp.files[0];
         if (!file) return;
-        label.classList.add('busy');
-        try {
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', '/api/upload');
-          xhr.setRequestHeader('Content-Type', file.type);
-          xhr.onload = () => {
-            label.classList.remove('busy');
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const r = JSON.parse(xhr.responseText);
-                if (r.url) {
-                  insertImageHtml(r.url);
-                  inp.value = '';
-                } else {
-                  toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
-                }
-              } catch (e) { toast('استجابة غير صالحة من الخادم'); }
-            } else {
-              try {
-                const r = JSON.parse(xhr.responseText);
-                toast('فشل الرفع: ' + (r.error || xhr.status));
-              } catch (e) { toast('فشل الرفع: ' + xhr.status); }
-            }
-          };
-          xhr.onerror = () => {
-            label.classList.remove('busy');
-            toast('تعذر الاتصال بالخادم أثناء الرفع');
-          };
-          xhr.send(file);
-        } catch (err) {
-          label.classList.remove('busy');
-          console.error('[editor] upload failed to start:', err);
-          toast('تعذر بدء الرفع');
-        }
+        uploadToDesc(file, { label, input: inp }, (url) => {
+          if (isVideoFile(file)) insertVideoHtml(url);
+          else insertImageHtml(url);
+        });
       });
     });
   }
 
-  /* ---- HTML mode "upload image from disk" (inserts <img> at caret) ---- */
+  /* ---- HTML mode "upload image/video from disk" (inserts tags at caret) ---- */
   function bindHtmlUpload() {
-    const label = document.querySelector('#ed-rt-panel-html .ed-rt-upload-html');
-    const inp = document.getElementById('f-desc-html-upload');
-    if (!label || !inp) return;
-    inp.addEventListener('change', () => {
-      const file = inp.files && inp.files[0];
-      if (!file) return;
-      label.classList.add('busy');
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.onload = () => {
-          label.classList.remove('busy');
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const r = JSON.parse(xhr.responseText);
-              if (r.url) {
-                insertHtmlImage(r.url);
-                inp.value = '';
-              } else {
-                toast('خطأ في الرفع: ' + (r.error || 'غير معروف'));
-              }
-            } catch (e) { toast('استجابة غير صالحة من الخادم'); }
-          } else {
-            try {
-              const r = JSON.parse(xhr.responseText);
-              toast('فشل الرفع: ' + (r.error || xhr.status));
-            } catch (e) { toast('فشل الرفع: ' + xhr.status); }
-          }
-        };
-        xhr.onerror = () => {
-          label.classList.remove('busy');
-          toast('تعذر الاتصال بالخادم أثناء الرفع');
-        };
-        xhr.send(file);
-      } catch (err) {
-        label.classList.remove('busy');
-        console.error('[editor] html upload failed to start:', err);
-        toast('تعذر بدء الرفع');
-      }
+    const binds = [
+      { labelSel: '#ed-rt-panel-html #ed-rt-upload-image-html input[type=file]', video: false },
+      { labelSel: '#ed-rt-panel-html #ed-rt-upload-video-html input[type=file]', video: true },
+    ];
+    binds.forEach((b) => {
+      const inp = document.querySelector(b.labelSel);
+      if (!inp) return;
+      const label = inp.closest('label');
+      inp.addEventListener('change', () => {
+        const file = inp.files && inp.files[0];
+        if (!file) return;
+        uploadToDesc(file, { label, input: inp }, (url, type) => {
+          if (b.video || isVideoFile(file)) insertHtmlVideo(url);
+          else insertHtmlImage(url);
+        });
+      });
     });
   }
 
@@ -247,6 +347,30 @@
       if (window.NovaSupabase && typeof window.NovaSupabase.deleteObject === 'function') {
         window.NovaSupabase.deleteObject(src).catch(function () {});
       }
+    } catch (e) { /* non-fatal */ }
+  }
+
+  function mediaUrlsIn(html) {
+    const out = [];
+    if (!html) return out;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = String(html);
+    wrap.querySelectorAll('img, video source, source').forEach((s) => {
+      const u = (s.getAttribute('src') || '').trim();
+      if (u && out.indexOf(u) === -1) out.push(u);
+    });
+    return out;
+  }
+
+  /* Deletes files that were present in a previously saved description but are
+     no longer referenced (e.g. the user removed a <video>/<img> before saving). */
+  function cleanupRemovedMedia(prevDesc, newDesc) {
+    try {
+      const prev = new Set(mediaUrlsIn(prevDesc));
+      const next = new Set(mediaUrlsIn(newDesc));
+      prev.forEach((u) => {
+        if (!next.has(u)) removeStoredImage(u);
+      });
     } catch (e) { /* non-fatal */ }
   }
 
@@ -652,6 +776,8 @@
     bindRichTextUpload();
     bindHtmlUpload();
     bindDescModes();
+    bindVideoDelete();
+    bindDescPaste();
 
     const boot = () => {
       if (isNew) { initNewMode(); return; }
@@ -1106,7 +1232,7 @@ $('#f-desc-rt').addEventListener('input', refreshPreview);
       if (taInput2) taInput2.addEventListener('input', refreshPreview);
 
       /* ---- Rich text toolbar ---- */
-      document.querySelectorAll('.ed-rt-btn').forEach((btn) => {
+      document.querySelectorAll('.ed-rt-btn[data-cmd]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const cmd = btn.dataset.cmd;
           const rt = $('#f-desc-rt');
@@ -1120,6 +1246,9 @@ $('#f-desc-rt').addEventListener('input', refreshPreview);
             const tag = btn.dataset.val || 'h3';
             const current = document.queryCommandValue('formatBlock');
             document.execCommand('formatBlock', false, current && current.toLowerCase() === tag ? 'p' : tag);
+          } else if (cmd === 'uploadImage' || cmd === 'uploadVideo') {
+            // handled by the label's associated file input (change listener)
+            return;
           } else {
             document.execCommand(cmd, false, null);
           }
@@ -1145,6 +1274,7 @@ $('#f-desc-rt').addEventListener('input', refreshPreview);
 
       $('#ed-save').addEventListener('click', async () => {
         const r = collect();
+        const prevDesc = data.desc || '';
         const body = Object.assign({}, data, r, { id: Number(id), landing: {
           headline: r.headline,
           lead: r.lead,
@@ -1155,6 +1285,8 @@ $('#f-desc-rt').addEventListener('input', refreshPreview);
         delete body.active;
         try {
           await apiSaveProduct(body);
+          data.desc = r.desc || '';
+          cleanupRemovedMedia(prevDesc, data.desc);
           const trCount = await saveI18N(false).catch(() => null);
           toast(trCount ? 'تم حفظ صفحة الهبوط و' + trCount + ' ترجمة — افتح المتجر لمشاهدة التغيير' : 'تم حفظ صفحة الهبوط — افتح المتجر لمشاهدة التغيير', 'success');
           updateI18nBadge();

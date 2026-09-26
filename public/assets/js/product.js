@@ -26,8 +26,8 @@
 
   function sanitizeRich(html) {
     if (!html) return '';
-    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code', 'style', 'svg', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'g', 'defs', 'lineargradient', 'stop', 'use']);
-    const allAttrs = new Set(['class', 'style', 'id', 'title', 'dir', 'align', 'width', 'height', 'alt', 'loading', 'target', 'rel', 'href', 'src', 'valign', 'colspan', 'rowspan', 'scope', 'border', 'cellpadding', 'cellspacing', 'bgcolor', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'fill-rule', 'clip-rule', 'opacity', 'transform', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'dx', 'dy', 'points', 'viewBox', 'offset', 'stop-color', 'stop-opacity', 'gradientunits']);
+    const allowed = new Set(['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'p', 'br', 'blockquote', 'a', 'img', 'div', 'span', 'small', 'mark', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'pre', 'code', 'style', 'svg', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'g', 'defs', 'lineargradient', 'stop', 'use', 'video', 'source', 'track']);
+    const allAttrs = new Set(['class', 'style', 'id', 'title', 'dir', 'align', 'width', 'height', 'alt', 'loading', 'target', 'rel', 'href', 'src', 'valign', 'colspan', 'rowspan', 'scope', 'border', 'cellpadding', 'cellspacing', 'bgcolor', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'fill-rule', 'clip-rule', 'opacity', 'transform', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'dx', 'dy', 'points', 'viewBox', 'offset', 'stop-color', 'stop-opacity', 'gradientunits', 'type', 'preload', 'controls', 'playsinline', 'muted', 'loop', 'poster', 'kind', 'label', 'srclang', 'default', 'quality']);
     const permHost = /^(https?:)?\/\//i;
     const wrap = document.createElement('div');
     wrap.innerHTML = decodeEntitiesOnce(html);
@@ -55,6 +55,21 @@
           node.setAttribute('src', src);
           node.setAttribute('loading', 'lazy');
           node.setAttribute('style', 'max-width:100%;border-radius:10px;');
+        }
+      }
+      if (tag === 'source') {
+        const src = node.getAttribute('src') || '';
+        if (!permHost.test(src) && !src.startsWith('/')) node.removeAttribute('src');
+      }
+      if (tag === 'video') {
+        // Force safe, non-autoplay, lazy-by-default behavior on the customer page.
+        node.setAttribute('controls', '');
+        node.setAttribute('playsinline', '');
+        node.removeAttribute('autoplay');
+        if (!node.getAttribute('preload')) node.setAttribute('preload', 'metadata');
+        const st = node.getAttribute('style') || '';
+        if (!/(max-)?width\s*:/.test(st) && !st.includes('width')) {
+          node.setAttribute('style', (st ? st + ';' : '') + 'max-width:100%;height:auto;');
         }
       }
       if (tag === 'use') {
@@ -603,6 +618,25 @@
       root.querySelectorAll('.reveal:not(.is-visible)').forEach((el) => io.observe(el));
     } else {
       root.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible'));
+    }
+
+    /* Lazy-load description videos: preload=none on first paint, then switch
+       to metadata when the video nears the viewport so big files don't slow
+       down page load. */
+    const descVids = root.querySelectorAll('.p-desc video, .p-desc-video video');
+    if (descVids.length) {
+      if ('IntersectionObserver' in window) {
+        const vio = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            e.target.preload = 'metadata';
+            vio.unobserve(e.target);
+          });
+        }, { rootMargin: '200px 0px' });
+        descVids.forEach((v) => { v.preload = 'none'; vio.observe(v); });
+      } else {
+        descVids.forEach((v) => { v.preload = 'metadata'; });
+      }
     }
   }
 

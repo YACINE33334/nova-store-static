@@ -318,6 +318,7 @@
   padding: 0 6px;
 }
 .ed-rt-btn:hover { background: #fff; color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
+.ed-rt-btn:disabled { opacity: .35; cursor: default; pointer-events: none; box-shadow: none; }
 .ed-rt-btn i { font-weight: 700; }
 .ed-rt-btn svg { display: block; }
 .ed-rt-h-mark {

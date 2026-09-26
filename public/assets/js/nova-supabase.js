@@ -65,8 +65,15 @@
     'image/png': '.png', 'image/jpeg': '.jpg', 'image/jpg': '.jpg',
     'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg',
   };
-  function newPath(ext) {
-    return 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + ext;
+  var VIDEO_EXT = {
+    'video/mp4': '.mp4', 'video/webm': '.webm',
+    'video/ogg': '.ogv', 'video/quicktime': '.mov',
+  };
+  function extFor(contentType) { return EXT[contentType] || VIDEO_EXT[contentType] || ''; }
+  function newPath(contentType) {
+    var ext = extFor(contentType);
+    var folder = VIDEO_EXT[contentType] ? 'videos' : 'uploads';
+    return folder + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + ext;
   }
   function publicUrl(path) {
     return STORAGE + '/object/public/' + BUCKET + '/' + path;
@@ -95,7 +102,7 @@
   }
   function uploadBytes(body, contentType) {
     return refreshSession().then(function () {
-      var path = newPath(EXT[contentType] || '');
+      var path = newPath(contentType);
       var t = withTimeout();
       var init = {
         method: 'POST',
