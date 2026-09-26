@@ -27,7 +27,7 @@
     const s = Math.abs(n).toLocaleString('en-US');
     return (n < 0 ? '-$' : '$') + s;
   };
-  const fmtNum = (n) => n.toLocaleString('en-US');
+  const fmtNum = (n) => (n == null || isNaN(n) ? 0 : n).toLocaleString('en-US');
   const fmtPct = (n) => n.toFixed(1) + '%';
 
   const $ = (sel, scope) => (scope || document).querySelector(sel);
@@ -177,7 +177,10 @@
 
   function toAdminRow(p) {
     const s = productSeed.find((x) => x.id === Number(p.id)) || {};
-    return Object.assign({ sku: s.sku || 'SKU-' + p.id, sold: s.sold != null ? s.sold : 0 }, p);
+    const out = Object.assign({}, p);
+    out.sku = p.sku || s.sku || 'SKU-' + p.id;
+    out.sold = p.sold != null ? Number(p.sold) : (s.sold != null ? s.sold : 0);
+    return out;
   }
 
   async function loadProducts() {
@@ -903,7 +906,7 @@
       const tb = $('#prod-tbody');
       const list = productStore.filter((p) => {
         const okTab = productFilter === 'all' || statusOf(p) === productFilter;
-        const okSearch = !productSearch || p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.sku.toLowerCase().includes(productSearch.toLowerCase());
+        const okSearch = !productSearch || String(p.name || '').toLowerCase().includes(productSearch.toLowerCase()) || String(p.sku || '').toLowerCase().includes(productSearch.toLowerCase());
         return okTab && okSearch;
       });
       if (!list.length) {
@@ -912,7 +915,7 @@
       }
       tb.innerHTML = list.map((p) => `
         <tr>
-          <td><div class="product-cell">${thumbnail(p)}<div><div class="cell-strong">${p.name}</div><div style="font-size:12px;color:var(--ink-muted)">${p.sku}</div></div></div></td>
+          <td><div class="product-cell">${thumbnail(p)}<div><div class="cell-strong">${p.name || ''}</div><div style="font-size:12px;color:var(--ink-muted)">${p.sku || ''}</div></div></div></td>
           <td class="cell-strong">${fmtMoney(p.price)}</td>
           <td>${statusOf(p) === 'inactive' ? '<span style="color:var(--danger);font-weight:600">غير متوفر</span>' : p.stock + ' قطعة'}</td>
           <td>${fmtNum(p.sold)}</td>
