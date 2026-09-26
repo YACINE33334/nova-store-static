@@ -481,6 +481,17 @@
     bindZipCity();
     bindLeadCapture(product, qty);
 
+    if (window.NovaPixel) {
+      window.NovaPixel.track('InitiateCheckout', {
+        content_ids: [String(product.id)],
+        content_name: product.name,
+        content_type: 'product',
+        value: total,
+        currency: window.NovaPixel.currency,
+        num_items: qty,
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = $('#o-name').value.trim();
@@ -531,6 +542,16 @@
   }
 
   function showSuccess(order, product) {
+    if (window.NovaPixel) {
+      window.NovaPixel.track('Purchase', {
+        content_ids: [String(product.id)],
+        content_name: product.name,
+        content_type: 'product',
+        value: Number(order.total) || 0,
+        currency: window.NovaPixel.currency,
+        num_items: Number(order.qty) || 1,
+      });
+    }
     $('#order-root').innerHTML = `
       <div class="order-success show">
         <div class="ok-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>

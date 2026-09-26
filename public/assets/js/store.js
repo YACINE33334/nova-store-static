@@ -109,6 +109,16 @@
     if (item) item.qty += 1;
     else cart.push({ id, qty: 1 });
     setCart(cart);
+    if (window.NovaPixel) {
+      const p = catalog.find((x) => x.id === id) || null;
+      window.NovaPixel.track('AddToCart', {
+        content_ids: [String(id)],
+        content_name: p ? p.name : '',
+        content_type: 'product',
+        value: Number(p ? p.price : 0) || 0,
+        currency: window.NovaPixel.currency,
+      });
+    }
     const btn = document.querySelector(`[data-add="${id}"]`);
     if (btn) {
       btn.classList.add('added');

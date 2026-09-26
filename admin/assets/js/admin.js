@@ -1494,6 +1494,7 @@
           <div class="settings-menu" id="set-menu">
             <button class="active" data-panel="general">عام</button>
             <button data-panel="storefront">الواجهة</button>
+            <button data-panel="pixel">البكسل (Pixel)</button>
           </div>
         </div>
 
@@ -1535,6 +1536,15 @@
         </div>
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ التغييرات</button></div>
       `,
+      pixel: `
+        <h3 class="card-title" style="margin-bottom:18px">تتبع فيسبوك (Meta Pixel)</h3>
+        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">ألصق معرّف البكسل (Facebook Pixel ID) ليفعّل المتجر التتبع تلقائيًا: تصفح الصفحات، مشاهدة المنتج، إضافة للسلة، بدء الدفع، والشراء. تظهر البيانات في منصة Meta Events Manager.</p>
+        <div class="form-group">
+          <label class="form-label">معرّف بكسل فيسبوك (Facebook Pixel ID)</label>
+          <input class="input" id="set-fb-pixel" dir="ltr" placeholder="مثال: 123456789012345" />
+        </div>
+        <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات البكسل</button></div>
+      `,
     };
 
     function showPanel(name) {
@@ -1544,17 +1554,19 @@
         if ($('#set-email')) settings.email = $('#set-email').value.trim();
         if ($('#set-whatsapp')) settings.whatsapp = $('#set-whatsapp').value.trim();
         if ($('#set-currency')) settings.currency = $('#set-currency').value;
+        if ($('#set-fb-pixel')) settings.fbPixel = $('#set-fb-pixel').value.trim();
         fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
           .then(() => toast('تم حفظ الإعدادات', 'success'))
           .catch(() => toast('خطأ في الحفظ'));
       }));
-      if (name === 'general') {
+      if (name === 'general' || name === 'pixel') {
         fetch('/api/settings').then(r => r.json()).then(s => {
           settings = s || {};
           if ($('#set-store-name')) $('#set-store-name').value = settings.storeName || '';
           if ($('#set-email')) $('#set-email').value = settings.email || '';
           if ($('#set-whatsapp')) $('#set-whatsapp').value = settings.whatsapp || '';
           if ($('#set-currency')) $('#set-currency').value = settings.currency || 'USD';
+          if ($('#set-fb-pixel')) $('#set-fb-pixel').value = settings.fbPixel || '';
         }).catch(() => {});
       }
     }

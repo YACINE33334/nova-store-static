@@ -691,6 +691,16 @@
       }
 
       render(P, root);
+
+      if (window.NovaPixel) {
+        window.NovaPixel.track('ViewContent', {
+          content_ids: [String(product.id)],
+          content_name: product.name,
+          content_type: 'product',
+          value: Number(product.price) || 0,
+          currency: window.NovaPixel.currency,
+        });
+      }
     })();
   });
 })();
