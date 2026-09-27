@@ -1,21 +1,22 @@
 /* =========================================================
    NOVA — Meta (Facebook) Conversions API + Pixel loader.
-   Reads from /api/settings (admin panel → الإعدادات → البكسل):
-     fbPixelName  : pixel name (informational)
-     fbPixel      : Pixel ID
-     fbToken      : Conversions API access token
-     fbTestCode   : Test Event Code (Events Manager → Test Events)
-     currency     : store currency
+   Supports MULTIPLE pixels. Reads from /api/settings
+   (admin panel → الإعدادات → البكسل):
+
+     fbPixels: [ { name, pixel, token, testCode }, ... ]
+     fbPixel / fbToken / ... → legacy single-pixel keys
+
    Behavior:
-     • If Pixel ID is set → injects the official base code (browser
-       Pixel) and fires PageView automatically.
-     • If access token is set → also POSTs every tracked event to
-       graph.facebook.com/{ver}/{pixelId}/events (Conversions API),
-       deduplicated with the browser event via the same event_id.
-     • If test code is set → sent as test_event_code in the CAPI
-       payload so events appear under "Test Events" in Events Manager.
+     • Each pixel ID is initialized in the browser Pixel base
+       code (fbq('init', id) for every configured pixel).
+     • Each pixel that has an access token also receives its
+       own Conversions API POST to
+       graph.facebook.com/{ver}/{pixelId}/events, using its own
+       token and its own test_event_code.
+     • Browser Pixel and CAPI share the same event_id per event
+       for deduplication.
    Exposes window.NovaPixel.track(event, params) with an internal
-   buffer so calls made before settings load are flushed afterwards.
+   buffer so calls made before settings load are flushed later.
    ========================================================= */
 (function () {
   'use strict';
@@ -48,19 +49,45 @@
     } catch (e) { return ''; }
   }
 
+  /* normalize settings into an array of pixel configs */
+  function pixelList() {
+    if (Array.isArray(settings.fbPixels) && settings.fbPixels.length) {
+      return settings.fbPixels.map(function (p) {
+        return {
+          name: String(p.name || '').trim(),
+          pixel: digits(p.pixel),
+          token: String(p.token || '').trim(),
+          testCode: String(p.testCode || '').trim(),
+        };
+      }).filter(function (p) { return p.pixel; });
+    }
+    var legacy = digits(settings.fbPixel);
+    if (legacy.length >= 6) {
+      return [{
+        name: String(settings.fbPixelName || '').trim(),
+        pixel: legacy,
+        token: String(settings.fbToken || '').trim(),
+        testCode: String(settings.fbTestCode || '').trim(),
+      }];
+    }
+    return [];
+  }
+
   /* ---------- browser Pixel base code ---------- */
-  function installPixel(pixelId) {
-    var code = [
+  function installPixel(list) {
+    var lines = [
       "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?",
       "n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;",
       "n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;",
       "t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}",
-      "(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');",
-      "fbq('init', '" + pixelId + "');"
-    ].join('\n');
+      "(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');"
+    ];
+    list.forEach(function (p) {
+      lines.push("fbq('init', '" + p.pixel + "');");
+    });
     var s = document.createElement('script');
     s.type = 'text/javascript';
-    s.text = code;
+    s.text = lines.join('\n');
     (document.head || document.documentElement).appendChild(s);
   }
 
@@ -71,7 +98,7 @@
     } catch (e) { /* ignore */ }
   }
 
-  /* ---------- Conversions API ---------- */
+  /* ---------- Conversions API (one POST per pixel with a token) ---------- */
   function capiPayload(event, params, eventId) {
     var ea = (params && params.contents) ? params.contents : [];
     if (params && !ea.length && params.content_ids && params.content_ids.length) {
@@ -94,7 +121,7 @@
     };
     var fbc = readCookie('_fbc');
     if (fbc) user.fbc = fbc;
-    var payload = {
+    return {
       event_name: event,
       event_time: Math.floor(Date.now() / 1000),
       event_id: eventId,
@@ -103,22 +130,21 @@
       user_data: user,
       custom_data: custom,
     };
-    return payload;
   }
 
   function sendCapi(event, params, eventId) {
-    var token = String(settings.fbToken || '').trim();
-    var pixel = digits(settings.fbPixel);
-    if (!token || !pixel) return;
-    var payload = { data: [capiPayload(event, params, eventId)] };
-    if (String(settings.fbTestCode || '').trim() !== '') payload.test_event_code = String(settings.fbTestCode).trim();
-    var url = 'https://graph.facebook.com/' + GRAPH_VER + '/' + pixel + '/events?access_token=' + encodeURIComponent(token);
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    }).catch(function () { /* CAPI errors are non-blocking */ });
+    pixelList().forEach(function (p) {
+      if (!p.token) return;
+      var payload = { data: [capiPayload(event, params, eventId)] };
+      if (p.testCode !== '') payload.test_event_code = p.testCode;
+      var url = 'https://graph.facebook.com/' + GRAPH_VER + '/' + p.pixel + '/events?access_token=' + encodeURIComponent(p.token);
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(function () { /* CAPI errors are non-blocking */ });
+    });
   }
 
   /* ---------- public API ---------- */
@@ -150,10 +176,9 @@
 
   window.NovaPixel = {
     get ready() { return ready; },
-    get pixelId() { return digits(settings.fbPixel); },
+    get pixels() { return pixelList(); },
     get currency() { return toCurrency(settings.currency); },
-    get capiEnabled() { return !!(String(settings.fbToken || '').trim() && digits(settings.fbPixel)); },
-    get testCode() { return String(settings.fbTestCode || '').trim(); },
+    get capiEnabled() { return pixelList().some(function (p) { return !!p.token; }); },
     track: track,
   };
 
@@ -161,8 +186,8 @@
     .then(function (r) { return r.json(); })
     .then(function (s) {
       settings = s || {};
-      var id = digits(settings.fbPixel);
-      if (id && id.length >= 6) installPixel(id);
+      var list = pixelList();
+      if (list.length) installPixel(list);
       ready = true;
       flush();
       track('PageView');

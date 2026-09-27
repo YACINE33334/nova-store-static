@@ -1538,22 +1538,44 @@
       `,
       pixel: `
         <h3 class="card-title" style="margin-bottom:18px">Facebook Conversions API</h3>
-        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">أعدّل أحداث المتجر (تصفح، مشاهدة منتج، إضافة للسلة، بدء الدفع، شراء) مباشرةً إلى Meta عبر Conversions API وPixel. للحصول على البيانات: أدخل اسم البكسل، المعرّف، رمز الوصول، ورمز الاختبار من إدارة الأحداث (Events Manager).</p>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">اسم البكسل</label><input class="input" id="set-fb-pixel-name" dir="ltr" placeholder="مثال: Chief Store" /></div>
-          <div class="form-group"><label class="form-label">معرّف البكسل</label><input class="input" id="set-fb-pixel" dir="ltr" placeholder="مثال: 123456789012345" /></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">رمز الوصول (Access Token)</label>
-          <input class="input" id="set-fb-token" dir="ltr" placeholder="مثال: EAAG... (يُظهر في المتصفح)" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">رمز الاختبار (Test Event Code)</label>
-          <input class="input" id="set-fb-test-code" dir="ltr" placeholder="مثال: TEST123456 (اختياري — من أداة Test Events)" />
-        </div>
+        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">أضف بكسلًا واحدًا أو أكثر. تُرسل أحداث المتجر (تصفح، مشاهدة منتج، إضافة للسلة، بدء الدفع، شراء) إلى جميع البكسلات عبر Pixel وConversions API.</p>
+        <div id="pixel-rows"></div>
+        <button class="btn btn-secondary btn-sm" id="pixel-add" type="button">+ إضافة بكسل</button>
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات البكسل</button></div>
       `,
     };
+
+    const pixelRowHTML = (p = {}) => `
+      <div class="pixel-row" style="border:1px solid var(--line-strong);border-radius:10px;padding:14px;margin-bottom:12px;display:grid;gap:12px">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">اسم البكسل</label><input class="input pix-name" dir="ltr" placeholder="مثال: بيكسل المحلات" value="${escapeHTML(p.name || '')}" /></div>
+          <div class="form-group"><label class="form-label">معرّف البكسل</label><input class="input pix-id" dir="ltr" placeholder="123456789012345" value="${escapeHTML(p.pixel || '')}" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">رمز الوصول (Access Token)</label><input class="input pix-token" dir="ltr" placeholder="EAAG... (يُظهر في المتصفح)" value="${escapeHTML(p.token || '')}" /></div>
+        <div class="form-group"><label class="form-label">رمز الاختبار (Test Event Code)</label><input class="input pix-test" dir="ltr" placeholder="TEST123456 (اختياري)" value="${escapeHTML(p.testCode || '')}" /></div>
+        <button class="btn btn-danger btn-sm pix-remove" type="button">حذف هذا البكسل</button>
+      </div>`;
+
+    function bindPixelRows() {
+      $$('#pixel-rows .pix-remove').forEach((b) => b.addEventListener('click', () => b.closest('.pixel-row').remove()));
+    }
+
+    function renderPixelRows(list) {
+      const wrap = $('#pixel-rows');
+      if (!wrap) return;
+      const arr = Array.isArray(list) && list.length ? list : [{}];
+      wrap.innerHTML = arr.map((p) => pixelRowHTML(p)).join('');
+      bindPixelRows();
+    }
+
+    function collectPixelRows() {
+      return Array.from($$('#pixel-rows .pixel-row')).map((r) => ({
+        name: $('.pix-name', r).value.trim(),
+        pixel: $('.pix-id', r).value.trim(),
+        token: $('.pix-token', r).value.trim(),
+        testCode: $('.pix-test', r).value.trim(),
+      })).filter((p) => p.name || p.pixel || p.token || p.testCode);
+    }
 
     function showPanel(name) {
       $('#set-body').innerHTML = panels[name];
@@ -1562,14 +1584,16 @@
         if ($('#set-email')) settings.email = $('#set-email').value.trim();
         if ($('#set-whatsapp')) settings.whatsapp = $('#set-whatsapp').value.trim();
         if ($('#set-currency')) settings.currency = $('#set-currency').value;
-        if ($('#set-fb-pixel')) settings.fbPixel = $('#set-fb-pixel').value.trim();
-        if ($('#set-fb-pixel-name')) settings.fbPixelName = $('#set-fb-pixel-name').value.trim();
-        if ($('#set-fb-token')) settings.fbToken = $('#set-fb-token').value.trim();
-        if ($('#set-fb-test-code')) settings.fbTestCode = $('#set-fb-test-code').value.trim();
+        if ($('#pixel-rows')) settings.fbPixels = collectPixelRows();
         fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
           .then(() => toast('تم حفظ الإعدادات', 'success'))
           .catch(() => toast('خطأ في الحفظ'));
       }));
+      const addBtn = $('#pixel-add');
+      if (addBtn) addBtn.addEventListener('click', () => {
+        $('#pixel-rows').insertAdjacentHTML('beforeend', pixelRowHTML());
+        bindPixelRows();
+      });
       if (name === 'general' || name === 'pixel') {
         fetch('/api/settings').then(r => r.json()).then(s => {
           settings = s || {};
@@ -1577,10 +1601,13 @@
           if ($('#set-email')) $('#set-email').value = settings.email || '';
           if ($('#set-whatsapp')) $('#set-whatsapp').value = settings.whatsapp || '';
           if ($('#set-currency')) $('#set-currency').value = settings.currency || 'USD';
-          if ($('#set-fb-pixel')) $('#set-fb-pixel').value = settings.fbPixel || '';
-          if ($('#set-fb-pixel-name')) $('#set-fb-pixel-name').value = settings.fbPixelName || '';
-          if ($('#set-fb-token')) $('#set-fb-token').value = settings.fbToken || '';
-          if ($('#set-fb-test-code')) $('#set-fb-test-code').value = settings.fbTestCode || '';
+          if (name === 'pixel') {
+            let rows = settings.fbPixels;
+            if (!Array.isArray(rows) && (settings.fbPixel || settings.fbToken)) {
+              rows = [{ name: settings.fbPixelName || '', pixel: settings.fbPixel || '', token: settings.fbToken || '', testCode: settings.fbTestCode || '' }];
+            }
+            renderPixelRows(rows);
+          }
         }).catch(() => {});
       }
     }
