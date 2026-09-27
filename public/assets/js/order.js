@@ -482,6 +482,13 @@
     bindLeadCapture(product, qty);
 
     if (window.NovaPixel) {
+      window.NovaPixel.setCustomer({
+        name: $('#o-name') ? $('#o-name').value.trim() : '',
+        phone: $('#o-phone') ? $('#o-phone').value.trim() : '',
+        city: $('#cf-city') ? $('#cf-city').value.trim() : '',
+        zip: $('#cf-zip') ? $('#cf-zip').value.trim() : '',
+        province: $('#cf-province') ? $('#cf-province').value.trim() : '',
+      });
       window.NovaPixel.track('InitiateCheckout', {
         content_ids: [String(product.id)],
         content_name: product.name,
@@ -543,6 +550,13 @@
 
   function showSuccess(order, product) {
     if (window.NovaPixel) {
+      window.NovaPixel.setCustomer({
+        name: order && order.name ? order.name : '',
+        phone: order && order.phone ? order.phone : '',
+        city: order && order.city ? order.city : '',
+        zip: order && order.zip ? order.zip : '',
+        province: order && order.province ? order.province : '',
+      });
       window.NovaPixel.track('Purchase', {
         content_ids: [String(product.id)],
         content_name: product.name,
