@@ -196,10 +196,13 @@
       content_type: (params && params.content_type) || 'product',
       content_ids: (params && params.content_ids) || [],
       contents: ea,
-      value: Number((params && params.value) || 0),
-      currency: toCurrency((params && params.currency) || settings.currency),
       num_items: Number((params && params.num_items) || 0),
     };
+    var hasValue = params && params.value != null && params.value !== '';
+    if (hasValue) {
+      custom.value = Number(params.value) || 0;
+      custom.currency = toCurrency((params && params.currency) || settings.currency);
+    }
     return {
       event_name: event,
       event_time: Math.floor(Date.now() / 1000),

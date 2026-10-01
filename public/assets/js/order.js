@@ -565,6 +565,12 @@
         currency: window.NovaPixel.currency,
         num_items: Number(order.qty) || 1,
       });
+      window.NovaPixel.track('Lead', {
+        content_ids: [String(product.id)],
+        content_name: product.name,
+        content_type: 'product',
+        num_items: Number(order.qty) || 1,
+      });
     }
     $('#order-root').innerHTML = `
       <div class="order-success show">
