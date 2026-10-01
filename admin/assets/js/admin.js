@@ -174,6 +174,7 @@
   const apiProducts = () => apiFetch('/api/products', { cache: 'no-store' });
   const apiSaveProduct = (p) => apiFetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) });
   const apiDeleteProduct = (id) => apiFetch('/api/products?id=' + id, { method: 'DELETE' });
+  const apiDeleteOrder = (id) => apiFetch('/api/orders?id=' + id, { method: 'DELETE' });
 
   function toAdminRow(p) {
     const s = productSeed.find((x) => x.id === Number(p.id)) || {};
@@ -496,6 +497,7 @@
         <td class="cell-strong">${fmtMoney(fmtOrderTotal(o))}</td>
         <td>${dateCell}</td>
         <td>${statusBadge(o.status)}</td>
+        <td><button type="button" class="btn btn-danger btn-sm" data-del-order="${o.id}" title="حذف الطلب">&times; حذف</button></td>
       </tr>`;
   }
 
@@ -1161,7 +1163,7 @@
         </div>
         <div class="table-wrap">
           <table class="table order-table">
-            <thead><tr><th>رقم الطلب</th><th>المنتج</th><th>الزبون</th><th>الهاتف</th><th>العنوان</th><th>المدينة</th><th>الرمز البريدي</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>المنتج</th><th>الزبون</th><th>الهاتف</th><th>العنوان</th><th>المدينة</th><th>الرمز البريدي</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
             <tbody id="ord-tbody"></tbody>
           </table>
         </div>
@@ -1195,7 +1197,7 @@
         const okSearch = !search || hay.includes(search);
         return okTab && okDate && okProd && okSearch;
       });
-      tb.innerHTML = list.length ? list.map(orderRow).join('') : `<tr><td colspan="11"><div class="empty">لا توجد طلبات مطابقة</div></td></tr>`;
+      tb.innerHTML = list.length ? list.map(orderRow).join('') : `<tr><td colspan="12"><div class="empty">لا توجد طلبات مطابقة</div></td></tr>`;
     }
     renderRows();
     fetch('/api/orders', { cache: 'no-store' })
@@ -1227,6 +1229,28 @@
     const tbody = $('#ord-tbody');
     if (tbody) {
       tbody.addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-order]');
+        if (delBtn) {
+          const oid = Number(delBtn.dataset.delOrder);
+          const found = liveOrders.find((o) => o.id === oid);
+          showConfirm({
+            title: 'حذف الطلب',
+            message: 'هل تريد فعلًا حذف الطلب #' + oid + (found && found.code ? ' (' + found.code + ')' : '') + ' نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.',
+            confirmText: 'حذف نهائيًا',
+            danger: true,
+            onConfirm: async () => {
+              try {
+                await apiDeleteOrder(oid);
+                liveOrders = liveOrders.filter((o) => o.id !== oid);
+                toast('تم حذف الطلب #' + oid, 'success');
+                renderRows();
+              } catch (err) {
+                toast('تعذر حذف الطلب: ' + (err && err.message ? err.message : err), 'error');
+              }
+            },
+          });
+          return;
+        }
         const tr = e.target.closest('tr[data-order]');
         if (!tr || e.target.closest('a, button')) return;
         const found = liveOrders.find((o) => o.id === Number(tr.dataset.order));

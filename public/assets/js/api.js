@@ -346,6 +346,19 @@
       });
     }
 
+    /* ---- DELETE orders (admin) ---- */
+    if (path === '/api/orders' && method === 'DELETE') {
+      return NS.refreshSession().then(function () {
+        if (!NS.isAuthed()) return Promise.resolve(mkResp(401, { error: 'No autenticado' }, url));
+        var did = u.searchParams.get('id');
+        if (!did) return Promise.resolve(mkResp(400, { error: 'Order id required' }, url));
+        return doFetch('/orders?id=eq.' + encodeURIComponent(did), { method: 'DELETE', headers: headers() }).then(function (r) {
+          if (r.status >= 200 && r.status < 300) return mkResp(200, { ok: true }, url);
+          return r.json().then(function (d) { return mkResp(r.status, { error: errBody(d, 'HTTP ' + r.status) }, url); });
+        });
+      });
+    }
+
     /* ---- PUT orders (admin spreadsheet save) ---- */
     if (path === '/api/orders' && method === 'PUT') {
       return NS.refreshSession().then(function () {
