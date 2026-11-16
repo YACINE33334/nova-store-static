@@ -3,20 +3,11 @@
    reembolso).
 
    Flujo:
-     1. Nombre
+     1. Nombre completo
      2. Teléfono
-     3. Mapa de GOOGLE (incrustado, real) con búsqueda tipo
-        Google Maps: escribe la calle, eliges la sugerencia
-        o usas tu ubicación → el mapa de Google salta a tu
-        punto exacto.
-     4. Confirmación debajo del mapa:
-        - dirección + código postal + ciudad + provincia auto
-          (provincia editable a mano, opcional)
-        - total a pagar contra reembolso
-        - botón "Realizar pedido"
-   Nota: sin API key el mapa de Google es interactivo (zoom,
-   desplazamiento) pero no podemos leer una pulsación directa;
-   la dirección se fija con la búsqueda / la ubicación.
+     3. Dirección: calle y número → ciudad + provincia
+        (lista de provincias) + código postal
+     4. Total a pagar contra reembolso + "Realizar pedido"
    ========================================================= */
 (function () {
   'use strict';
@@ -52,199 +43,51 @@
 
   const $ = (sel, scope) => (scope || document).querySelector(sel);
 
+  /* ---------------- provincias de la España peninsular ----------------
+     (sin Baleares, Canarias, Ceuta ni Melilla: solo península) */
+  const PROVINCIAS = [
+    'A Coruña', 'Albacete', 'Alicante', 'Almería', 'Araba/Álava', 'Asturias', 'Badajoz',
+    'Barcelona', 'Bizkaia', 'Burgos', 'Cantabria', 'Castellón',
+    'Ciudad Real', 'Cuenca', 'Cáceres', 'Cádiz', 'Córdoba', 'Gipuzkoa', 'Girona',
+    'Granada', 'Guadalajara', 'Huelva', 'Huesca', 'Jaén', 'La Rioja',
+    'León', 'Lleida', 'Lugo', 'Madrid', 'Murcia', 'Málaga',
+    'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca',
+    'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo', 'Valencia',
+    'Valladolid', 'Zamora', 'Zaragoza', 'Ávila',
+  ];
+
+  function provinceOptions() {
+    return PROVINCIAS.map((p) => `<option value="${p}">${p}</option>`).join('');
+  }
+
+  function normalizeProvince(v) {
+    return String(v || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/^(comunidad foral de |comunidad de |comunitat de |principado de |region de )/, '')
+      .trim();
+  }
+
+  function matchProvince(v) {
+    const n = normalizeProvince(v);
+    if (!n) return '';
+    for (const p of PROVINCIAS) if (normalizeProvince(p) === n) return p;
+    return '';
+  }
+
   async function fetchJson(url, opts) {
     const res = await fetch(url, Object.assign({ cache: 'no-store' }, opts));
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, data };
   }
 
-  /* ---------------- mapa (Google incrustado) ---------------- */
-
-  const ESPAÑA = { lat: 40.4637, lng: -3.7492 };
-
-  let pendingCoords = null;
-  function syncGoogleMap(ll) {
-    const frame = $('#gmap-main');
-    if (!frame || !ll) return;
-    const wrap = $('#map-wrap');
-    if (!wrap || wrap.hidden) { pendingCoords = ll; return; }
-    frame.src = 'https://maps.google.com/maps?q=' + ll.lat + ',' + ll.lng + '&z=17&hl=es&output=embed';
-  }
-
-  function setCoords(ll) {
-    const street = $('#cf-street');
-    if (street) { street.dataset.lat = String(ll.lat); street.dataset.lng = String(ll.lng); }
-  }
-
-  function pick(addr, keys) {
-    for (const k of keys) if (addr[k] && typeof addr[k] === 'string') return addr[k];
-    return '';
-  }
-
-  function prefillFromAddress(addr, ll) {
-    if (!addr) return;
-    const road = pick(addr, ['road', 'pedestrian', 'footway', 'highway', 'square']);
-    const number = pick(addr, ['house_number']);
-    const street = road ? (number ? road + ', ' + number : road) : '';
-    const zip = pick(addr, ['postcode']);
-    const city = pick(addr, ['city', 'town', 'village', 'city_district', 'quarter']);
-    const prov = pick(addr, ['state', 'province', 'region']);
-    if (street) $('#cf-street').value = street;
-    if (zip) $('#cf-zip').value = zip;
-    if (city) $('#cf-city').value = city;
-    if (prov) $('#cf-province').value = prov;
-    if (ll) setCoords(ll);
-    if (ll) syncGoogleMap(ll);
-    else syncGoogleMap(lastLatLng);
-  }
-
-  let lastLatLng = null;
-  function rememberCoords(ll) {
-    if (!ll) return;
-    lastLatLng = ll;
-    setCoords(ll);
-  }
-
-  async function reverseGeocode(ll) {
-    try {
-      const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=es'
-        + '&lat=' + ll.lat + '&lon=' + ll.lng;
-      const res = await fetch(url, { headers: { Accept: 'application/json' } });
-      const j = await res.json();
-      rememberCoords(ll);
-      prefillFromAddress(j.address, ll);
-    } catch (e) { /* sin internet: se queda lo escrito */ }
-  }
-
-  /* ---------------- búsqueda (estilo Google Maps) ---------------- */
-
-  let results = [];
-  let suggestVisible = false;
-  let searchTimer = null;
-
-  async function searchAddresses(q) {
-    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&countrycodes=es&accept-language=es&q='
-      + encodeURIComponent(q);
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    return res.json();
-  }
-
-  function renderSuggest() {
-    const box = $('#suggest');
-    if (!box) return;
-    if (!results.length) { box.hidden = true; suggestVisible = false; return; }
-    box.innerHTML = results.map((r, i) => {
-      const d = r.display_name || '';
-      const comma = d.indexOf(',');
-      const name = comma >= 0 ? d.slice(0, comma) : d;
-      const meta = comma >= 0 ? d.slice(comma + 1).trim() : '';
-      return `<button type="button" class="sug-item" role="option" data-i="${i}">
-        <span class="sug-pin"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
-        <span><span class="sug-name">${escapeHtml(name)}</span><span class="sug-meta">${escapeHtml(meta)}</span></span>
-      </button>`;
-    }).join('');
-    box.hidden = false;
-    suggestVisible = true;
-  }
-
-  async function doSearch(q) {
-    const box = $('#suggest');
-    if (!q || q.length < 3) { box.hidden = true; results = []; return []; }
-    try { results = await searchAddresses(q); } catch (e) { results = []; }
-    renderSuggest();
-    return results;
-  }
-
-  function chooseResult(idx) {
-    const r = results[idx];
-    const box = $('#suggest');
-    box.hidden = true; suggestVisible = false;
-    if (!r) return;
-    const ll = { lat: parseFloat(r.lat), lng: parseFloat(r.lon) };
-    rememberCoords(ll);
-    $('#order-error').classList.remove('show');
-    prefillFromAddress(r.address, ll);
-    const card = $('#cf-card');
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function bindAutocomplete() {
-    const input = $('#q-address');
-    const box = $('#suggest');
-
-    input.addEventListener('input', () => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => doSearch(input.value.trim()), 320);
-    });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (suggestVisible && results.length) chooseResult(0);
-        else doSearch(input.value.trim()).then((r) => {
-          if (!r || !r.length) showError(t('search_not_found', { q: input.value.trim() }));
-        });
-      } else if (e.key === 'Escape') {
-        box.hidden = true; suggestVisible = false;
-      }
-    });
-
-    input.addEventListener('blur', () => setTimeout(() => { box.hidden = true; suggestVisible = false; }, 150));
-    box.addEventListener('click', (e) => { const it = e.target.closest('.sug-item'); if (it) chooseResult(Number(it.dataset.i)); });
-  }
-
-  /* ---------------- ubicación del usuario ---------------- */
-
-  function bindLocate() {
-    const btn = $('#loc-use');
-    btn.addEventListener('click', () => {
-      if (!navigator.geolocation) { showError(t('locate_no_geo')); return; }
-      btn.textContent = t('locate_locating');
-      btn.disabled = true;
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          rememberCoords(ll);
-          reverseGeocode(ll);
-          $('#order-error').classList.remove('show');
-          btn.textContent = t('loc_use');
-          btn.disabled = false;
-        },
-        () => {
-          btn.textContent = t('loc_use');
-          btn.disabled = false;
-          showError(t('locate_fail'));
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    });
-  }
+  /* ---------------- errores ---------------- */
 
   function showError(msg) {
     const el = $('#order-error');
     if (!el) return;
     el.textContent = msg;
     el.classList.add('show');
-  }
-
-  /* ---------------- mapa opcional (colapsado) ---------------- */
-
-  function bindMapToggle() {
-    const btn = $('#map-toggle');
-    const wrap = $('#map-wrap');
-    if (!btn || !wrap) return;
-    btn.addEventListener('click', () => {
-      const open = wrap.hidden;
-      wrap.hidden = !open;
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) {
-        const frame = $('#gmap-main');
-        if (frame && pendingCoords) {
-          frame.src = 'https://maps.google.com/maps?q=' + pendingCoords.lat + ',' + pendingCoords.lng + '&z=17&hl=es&output=embed';
-          pendingCoords = null;
-        }
-      }
-    });
   }
 
   /* ---------------- ciudad automática desde código postal ---------------- */
@@ -278,7 +121,12 @@
             cityInput.dataset.autofilled = '1';
           }
           if (provInput && prov) {
-            provInput.value = prov;
+            if (provInput.tagName === 'SELECT') {
+              const match = matchProvince(prov);
+              if (match) provInput.value = match;
+            } else {
+              provInput.value = prov;
+            }
           }
         } catch (e) { /* sin internet: el cliente escribe la ciudad */ }
       }, 450);
@@ -328,12 +176,6 @@
       qty: qty,
       name, phone, address: street, city, zip, province: prov,
     };
-    const el = $('#cf-street');
-    if (el && el.dataset) {
-      const lat = parseFloat(el.dataset.lat);
-      const lng = parseFloat(el.dataset.lng);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) { body.lat = lat; body.lng = lng; }
-    }
     return body;
   }
 
@@ -399,75 +241,53 @@
         </div>
 
         <form class="order-form" id="order-form" novalidate>
-          <div class="ck-fields-head">
-            <h2>${t('fields_head')}</h2>
-            <p>${t('fields_sub')}</p>
-          </div>
-          <div class="order-field">
-            <label for="o-name">${t('name_label')} <span>*</span></label>
+          <h2 class="ck-title">${t('fields_head')}</h2>
+          <p class="ck-sub">${t('fields_sub')}</p>
+
+          <div class="ck-field">
             <input type="text" id="o-name" name="name" placeholder="${t('name_ph')}" autocomplete="name" required />
+            <label for="o-name">${t('name_label')} <span>*</span></label>
           </div>
-          <div class="order-field">
-            <label for="o-phone">${t('phone_label')} <span>*</span></label>
+
+          <div class="ck-field">
             <input type="tel" id="o-phone" name="phone" placeholder="${t('phone_ph')}" autocomplete="tel" required />
-            <span class="hint">${t('phone_hint')}</span>
+            <label for="o-phone">${t('phone_label')} <span>*</span></label>
           </div>
 
-          <div class="cf-card" id="cf-card">
-            <div class="cf-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="3"/></svg>
-              ${t('ship_title')}
-            </div>
-            <div class="cf-grid">
-              <div class="cf-field wide">
-                <label for="cf-city">${t('city_label')} <span>*</span></label>
-                <input type="text" id="cf-city" name="city" placeholder="${t('city_ph')}" autocomplete="address-level2" required />
-                <span class="hint">${t('city_hint')}</span>
-              </div>
-              <div class="cf-field wide">
-                <label for="cf-street">${t('street_label')} <span>*</span></label>
-                <input type="text" id="cf-street" name="address" placeholder="${t('street_ph')}" autocomplete="street-address" required />
-              </div>
-              <div class="cf-field">
-                <label for="cf-province">${t('prov_label')}</label>
-                <input type="text" id="cf-province" name="province" placeholder="${t('prov_ph')}" autocomplete="address-level1" />
-              </div>
-              <div class="cf-field">
-                <label for="cf-zip">${t('zip_label')} <span>*</span></label>
-                <input type="text" id="cf-zip" name="zip" inputmode="numeric" placeholder="${t('zip_ph')}" autocomplete="postal-code" maxlength="5" required />
-              </div>
-            </div>
+          <div class="ck-field">
+            <input type="text" id="cf-street" name="address" placeholder="${t('street_ph')}" autocomplete="street-address" required />
+            <label for="cf-street">${t('street_label')} <span>*</span></label>
+          </div>
 
-            <button type="button" class="map-toggle" id="map-toggle" aria-expanded="false">
-              <span class="mt-txt">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>${t('map_toggle')}</span>
-              </span>
-              <svg class="mt-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-
-            <div class="map-wrap" id="map-wrap" hidden>
-              <div class="search-pill">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="q-address" placeholder="${t('search_ph')}" autocomplete="off" inputmode="search" />
-              </div>
-              <div class="suggest" id="suggest" role="listbox" hidden></div>
-              <iframe id="gmap-main" class="o-gmap" title="Mapa de Google" src="https://maps.google.com/maps?ll=${ESPAÑA.lat},${ESPAÑA.lng}&z=6&hl=es&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-              <button type="button" class="loc-use" id="loc-use">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
-                ${t('loc_use')}
-              </button>
-              <div class="loc-caption"><span class="loc-hint">${t('loc_hint')}</span></div>
+          <div class="ck-row3">
+            <div class="ck-field">
+              <input type="text" id="cf-city" name="city" placeholder="${t('city_ph')}" autocomplete="address-level2" required />
+              <label for="cf-city">${t('city_label')} <span>*</span></label>
             </div>
-
-            <div class="cf-pay">
-              <div class="cf-pay-price"><span class="cp-label">${t('pay_label')}</span><span class="cp-amount">${currency(total)}</span></div>
-              <button type="submit" class="btn btn-accent btn-lg" id="order-submit">${t('submit')}</button>
+            <div class="ck-field">
+              <select id="cf-province" name="province" autocomplete="address-level1">
+                <option value="">${t('prov_select')}</option>
+                ${provinceOptions()}
+              </select>
+              <label for="cf-province">${t('prov_label')}</label>
             </div>
+            <div class="ck-field">
+              <input type="text" id="cf-zip" name="zip" inputmode="numeric" placeholder="${t('zip_ph')}" autocomplete="postal-code" maxlength="5" required />
+              <label for="cf-zip">${t('zip_label')} <span>*</span></label>
+            </div>
+          </div>
+
+          <div class="ck-pay">
+            <div class="ck-total">
+              <span>${t('pay_label')}</span>
+              <strong>${currency(total)}</strong>
+            </div>
+            <button type="submit" class="ck-submit" id="order-submit">${t('submit')}</button>
           </div>
 
           <div class="order-error" id="order-error"></div>
         </form>
+
       </div>
     `;
 
@@ -475,9 +295,6 @@
     const errorBox = $('#order-error');
     const submitBtn = $('#order-submit');
 
-    bindAutocomplete();
-    bindLocate();
-    bindMapToggle();
     bindZipCity();
     bindLeadCapture(product, qty);
 
@@ -527,10 +344,6 @@
         city: city,
         province: $('#cf-province').value.trim(),
       };
-      const lat = parseFloat($('#cf-street').dataset.lat);
-      const lng = parseFloat($('#cf-street').dataset.lng);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) { body.lat = lat; body.lng = lng; }
-
       const { ok, data, status } = await fetchJson('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
