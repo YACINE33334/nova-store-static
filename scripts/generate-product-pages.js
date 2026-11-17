@@ -29,8 +29,8 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-function fetchProducts() {
-  const url = SB_URL + '/rest/v1/products?select=id,data&order=id.asc';
+function fetchRest(resource) {
+  const url = SB_URL + '/rest/v1/' + resource;
   return new Promise((resolve, reject) => {
     https.get(url, {
       headers: {
@@ -48,10 +48,26 @@ function fetchProducts() {
         }
         let rows;
         try { rows = JSON.parse(body); } catch (e) { return reject(new Error('Invalid JSON from Supabase')); }
-        resolve(rows.map((r) => Object.assign({ id: r.id }, r.data || {})));
+        resolve(rows);
       });
     }).on('error', reject);
   });
+}
+
+function fetchProducts() {
+  return fetchRest('products?select=id,data&order=id.asc')
+    .then((rows) => rows.map((r) => Object.assign({ id: r.id }, r.data || {})));
+}
+
+// Boot settings are baked in so the product page never waits on Supabase to paint.
+function fetchSettings() {
+  return fetchRest('settings?select=key,value')
+    .then((rows) => {
+      const out = {};
+      rows.forEach((r) => { if (r && r.key) out[r.key] = r.value; });
+      return out;
+    })
+    .catch(() => ({}));
 }
 
 function absoluteHtml(html) {
@@ -67,7 +83,7 @@ function absoluteHtml(html) {
     .replace(/location\.href='(?!\/|https?:)([^']+)'/g, (m, v) => "location.href='/" + v.replace(/^\.\//, '') + "'");
 }
 
-function buildPage(template, product, slug) {
+function buildPage(template, product, slug, settings) {
   const title = (product.headline || product.name || 'Producto') + ' — NOVA';
   let rawDesc = String(product.desc || product.lead || '')
     .replace(/<[^>]*>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
@@ -87,18 +103,22 @@ function buildPage(template, product, slug) {
   <meta property="og:url" content="${esc(url)}" />
   ${image ? `<meta property="og:image" content="${esc(image)}" />` : ''}`;
 
+  // JSON is escaped so a product description containing </script> cannot break out.
+  const boot = JSON.stringify({ id: product.id, product, settings: settings || {} })
+    .replace(/</g, '\\u003c').replace(/&/g, '\\u0026');
+
   return template
     .replace('<title>Producto — NOVA</title>', '<title>' + esc(title) + '</title>')
     .replace('<meta name="description" content="" />', '<meta name="description" content="' + esc(desc) + '" />')
     .replace('<meta id="og-title" property="og:title" content="" />', '<meta id="og-title" property="og:title" content="' + esc(title) + '" />')
     .replace('<meta id="og-desc" property="og:description" content="" />', '<meta id="og-desc" property="og:description" content="' + esc(desc) + '" />')
     .replace('<!--NOVA_PRODUCT_META-->', meta)
-    .replace('<!--NOVA_PRODUCT_ID-->', '<script>window.NOVA_PRODUCT_ID=' + Number(product.id) + ';</script>');
+    .replace('<!--NOVA_PRODUCT_ID-->', '<script>window.NOVA_BOOT=' + boot + ';window.NOVA_PRODUCT_ID=' + Number(product.id) + ';</script>');
 }
 
 (async () => {
   const template = absoluteHtml(fs.readFileSync(TEMPLATE, 'utf8'));
-  const products = await fetchProducts();
+  const [products, settings] = await Promise.all([fetchProducts(), fetchSettings()]);
   const slugs = products.map((p) => novaSlugFor(p, products));
 
   const seen = new Set();
@@ -109,7 +129,7 @@ function buildPage(template, product, slug) {
 
     const dir = path.join(SITE, slug);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'index.html'), buildPage(template, p, slug), 'utf8');
+    fs.writeFileSync(path.join(dir, 'index.html'), buildPage(template, p, slug, settings), 'utf8');
     console.log('/' + slug + '/  <- ' + p.id + ' ' + (p.name || ''));
   });
 
