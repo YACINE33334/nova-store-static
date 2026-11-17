@@ -1,7 +1,8 @@
 /* =========================================================
    NOVA — Product landing page
    Renders a clean, high-end landing page for a single product
-   loaded from /product.html?id=<n>
+   loaded from /product.html?id=<n> or from a generated /<slug>/ page
+   (where the id is injected via window.NOVA_PRODUCT_ID)
    ========================================================= */
 (function () {
   'use strict';
@@ -259,7 +260,7 @@
           <span class="eyebrow">Producto no encontrado</span>
           <h1 class="section-title">Este producto no existe.</h1>
           <p class="section-sub" style="margin:0 auto 24px">Es posible que la página se haya movido o que el producto ya no esté disponible.</p>
-          <a class="btn btn-accent" href="./#products">Volver a la colección</a>
+          <a class="btn btn-accent" href="/#products">Volver a la colección</a>
         </div>
       </section>`;
   }
@@ -312,8 +313,8 @@
     root.innerHTML = `
       <!-- BREADCRUMB -->
       <div class="container p-crumb">
-        <a href="./">Inicio</a><span>/</span>
-        <a href="./#products">Tienda</a><span>/</span>
+        <a href="/">Inicio</a><span>/</span>
+        <a href="/#products">Tienda</a><span>/</span>
         <span class="crumb-current">${product.name}</span>
       </div>
 
@@ -347,7 +348,7 @@
             <span>Precio más bajo en los últimos 30 días</span>
           </div>` : ''}
 
-          <img class="p-delivery-img" src="assets/img/ZR.png" alt="Contra reembolso">
+          <img class="p-delivery-img" src="/assets/img/ZR.png" alt="Contra reembolso">
 
           <!-- Actions -->
           <div class="p-actions">
@@ -584,7 +585,7 @@
 
     // Buy Now → open the order form page with product, qty 1
     const goBuy = () => {
-      location.href = 'order.html?id=' + product.id + '&qty=1';
+      location.href = '/order.html?id=' + product.id + '&qty=1';
     };
     $('#p-buy').addEventListener('click', goBuy);
 
@@ -651,7 +652,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('product-root');
     if (!root) return;
-    const id = Number(new URLSearchParams(location.search).get('id'));
+    const injected = window.NOVA_PRODUCT_ID;
+    const id = Number(injected != null ? injected : new URLSearchParams(location.search).get('id'));
 
     (async () => {
       let product = null;
@@ -680,10 +682,13 @@
 
       // Meta
       document.title = P.name + ' — NOVA';
-      $('#og-title', document.head).setAttribute('content', P.name + ' — NOVA');
-      $('#og-desc', document.head).setAttribute('content', P.desc.slice(0, 150));
+      // Generated /<slug>/ pages already have clean, pre-rendered meta tags.
+      const ogTitle = $('#og-title', document.head);
+      const ogDesc = $('#og-desc', document.head);
       const mdesc = document.querySelector('meta[name="description"]');
-      if (mdesc) mdesc.setAttribute('content', P.desc.slice(0, 160));
+      if (ogTitle && !ogTitle.getAttribute('content')) ogTitle.setAttribute('content', P.name + ' — NOVA');
+      if (ogDesc && !ogDesc.getAttribute('content')) ogDesc.setAttribute('content', String(P.desc || '').slice(0, 150));
+      if (mdesc && !mdesc.getAttribute('content')) mdesc.setAttribute('content', String(P.desc || '').slice(0, 160));
 
       // Wait for the shared currency module (settings → symbol) before painting prices
       if (window.NOVA_MONEY) {

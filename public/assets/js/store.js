@@ -131,6 +131,13 @@
   }
 
   /* ---------- Product card ---------- */
+  // Pretty URL generated at build time by scripts/generate-product-pages.js.
+  // Fallback keeps the old query-string link if slug.js did not load.
+  function productHref(p) {
+    if (typeof window.novaSlugFor === 'function') return '/' + window.novaSlugFor(p, catalog) + '/';
+    return 'product.html?id=' + p.id;
+  }
+
   function productCard(p) {
     const price = p.old
       ? `<span class="price old">${currency(p.old)}</span><span class="price red">${currency(p.price)}</span>`
@@ -141,7 +148,7 @@
     const hasImgs = p.images && p.images.length;
     return `
       <article class="product-card reveal">
-        <a class="product-media" style="background:${hasImgs ? '#fff' : p.hue}" href="product.html?id=${p.id}" aria-label="${p.name}">
+        <a class="product-media" style="background:${hasImgs ? '#fff' : p.hue}" href="${productHref(p)}" aria-label="${p.name}">
           ${tag}
           ${hasImgs
             ? `<img src="${p.images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">`
@@ -150,7 +157,7 @@
         </a>
         <div class="product-info">
           <span class="product-cat">${p.cat}</span>
-          <h3 class="product-name"><a href="product.html?id=${p.id}">${p.name}</a></h3>
+          <h3 class="product-name"><a href="${productHref(p)}">${p.name}</a></h3>
           <div class="product-price">${price}</div>
           <button class="add-btn" data-add="${p.id}">Añadir al carrito</button>
         </div>

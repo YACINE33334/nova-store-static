@@ -26,6 +26,8 @@ jobs:
           mkdir -p _site/admin
           cp -r admin/. _site/admin/
           touch _site/.nojekyll
+      - name: Generate pretty product pages
+        run: node scripts/generate-product-pages.js _site
       - uses: actions/configure-pages@v5
         with:
           enablement: true
