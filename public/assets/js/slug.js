@@ -17,24 +17,17 @@
   function novaSlug(name, id) {
     var s = String(name || '');
     try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) { /* old browser */ }
-    s = s.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 80)
-      .replace(/-+$/g, '');
+    // Only the first 3 letters of the name + the id, e.g. "Collar Rosa de Sangre" -> col-29.
+    var letters = s.toLowerCase().replace(/[^a-z]/g, '').slice(0, 3);
     // Arabic / non-Latin names (or empty) fall back to a stable numeric slug.
-    if (!s) s = 'producto-' + id;
-    return s;
+    if (!letters) return 'producto-' + id;
+    return letters + '-' + id;
   }
 
-  // Resolve collisions by appending the id only when two products share a base slug.
+  // The id is always included, so two products sharing the same first 3 letters
+  // can never collide (e.g. rel-11 and rel-28).
   function novaSlugFor(product, all) {
-    var base = novaSlug(product && product.name, product && product.id);
-    var list = Array.isArray(all) ? all : [];
-    var clash = list.some(function (p) {
-      return p && p.id !== product.id && novaSlug(p.name, p.id) === base;
-    });
-    return clash ? base + '-' + product.id : base;
+    return novaSlug(product && product.name, product && product.id);
   }
 
   return { novaSlug: novaSlug, novaSlugFor: novaSlugFor };
