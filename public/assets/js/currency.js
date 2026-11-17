@@ -33,13 +33,25 @@
   }
 
   function load() {
+    // Generated product pages bake the current settings into NOVA_BOOT, so the
+    // money formatter is ready immediately instead of blocking paint on an API call.
+    var boot = (window.NOVA_BOOT && window.NOVA_BOOT.settings) || null;
+    var bootCurrency = boot && boot.currency && CFG[boot.currency] ? boot.currency : '';
+    if (bootCurrency) {
+      current = CFG[bootCurrency];
+      trigger();
+    }
+
     fetch('/api/settings', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (s) {
-        if (s && s.currency && CFG[s.currency]) current = CFG[s.currency];
+        if (s && s.currency && CFG[s.currency] && s.currency !== bootCurrency) {
+          current = CFG[s.currency];
+          if (bootCurrency) window.dispatchEvent(new CustomEvent('nova:money'));
+        }
       })
       .catch(function () { /* keep default USD */ })
-      .then(trigger);
+      .then(function () { if (!bootCurrency) trigger(); });
   }
 
   load();

@@ -643,6 +643,19 @@
 
   const $ = (sel, scope) => (scope || document).querySelector(sel);
 
+  // Only the price strings change when the store currency is edited in the admin
+  // panel — re-rendering the whole page would reset the gallery and tabs.
+  function refreshPrices(product) {
+    const wrap = document.querySelector('.p-price-wrap');
+    if (!wrap || !product) return;
+    const html = product.old
+      ? `<span class="p-price">${currency(product.price)}</span><span class="p-price-old">${currency(product.old)}</span>`
+      : `<span class="p-price">${currency(product.price)}</span>`;
+    wrap.innerHTML = html + (product.old
+      ? `<span class="p-save">Ahorra ${currency(product.old - product.price)}</span>`
+      : '');
+  }
+
   async function fetchJson(url) {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -656,24 +669,39 @@
     const id = Number(injected != null ? injected : new URLSearchParams(location.search).get('id'));
 
     (async () => {
+      // Generated /<slug>/ pages carry the product + settings at build time, so
+      // they paint immediately. The legacy /product.html?id=N keeps the live API.
+      const boot = window.NOVA_BOOT || null;
+      const baked = boot && boot.product && Number(boot.product.id) === id ? boot.product : null;
       let product = null;
-      // Store settings (WhatsApp number, etc.)
-      try {
-        const s = await fetchJson('/api/settings');
-        if (s && s.whatsapp) {
+
+      if (baked) {
+        const s = boot.settings || {};
+        if (s.whatsapp) {
           let num = String(s.whatsapp).trim();
           num = num.replace(/[^\d]/g, '').replace(/^00/, '');
           waNumber = num;
         }
-      } catch (e) { /* keep default */ }
-      // Primary source: the live API (works even if the shared catalog/JS is stale)
-      try {
-        const j = await fetchJson('/api/products?id=' + id);
-        if (j && j.id) product = j;
-      } catch (e) { /* fall through */ }
-      // Fallback: shared catalog (seed / offline)
-      if (!product && window.NovaStore) {
-        product = window.NovaStore.catalog.find((p) => p.id === id) || null;
+        product = baked;
+      } else {
+        // Store settings (WhatsApp number, etc.)
+        try {
+          const s = await fetchJson('/api/settings');
+          if (s && s.whatsapp) {
+            let num = String(s.whatsapp).trim();
+            num = num.replace(/[^\d]/g, '').replace(/^00/, '');
+            waNumber = num;
+          }
+        } catch (e) { /* keep default */ }
+        // Primary source: the live API (works even if the shared catalog/JS is stale)
+        try {
+          const j = await fetchJson('/api/products?id=' + id);
+          if (j && j.id) product = j;
+        } catch (e) { /* fall through */ }
+        // Fallback: shared catalog (seed / offline)
+        if (!product && window.NovaStore) {
+          product = window.NovaStore.catalog.find((p) => p.id === id) || null;
+        }
       }
       if (!product) { renderNotFound(root); return; }
 
@@ -696,6 +724,8 @@
       }
 
       render(P, root);
+      window.__novaRenderedProduct = P;
+      window.addEventListener('nova:money', () => refreshPrices(window.__novaRenderedProduct));
 
       if (window.NovaPixel) {
         window.NovaPixel.track('ViewContent', {

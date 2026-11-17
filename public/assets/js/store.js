@@ -465,13 +465,18 @@
   }
 
   /* ---------- Init ---------- */
+  // Generated product pages already carry their product in NOVA_BOOT: there is no
+  // need to fetch the whole catalog again just to paint one product page.
+  const bootProduct = window.NOVA_BOOT && window.NOVA_BOOT.product;
+  if (bootProduct) catalog = [bootProduct];
+
   // Expose shared store data for other modules (product.js, cart.js, admin …)
   window.NovaStore = {
     get catalog() { return catalog; },
     addToCart,
     getCart,
     currency,
-    ready: loadCatalog(),
+    ready: bootProduct ? Promise.resolve(catalog) : loadCatalog(),
   };
 
   document.addEventListener('DOMContentLoaded', () => {
