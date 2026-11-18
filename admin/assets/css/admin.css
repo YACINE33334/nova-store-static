@@ -349,6 +349,47 @@ tr.order-draft:hover td { background: #faf0d8; }
 .order-draft .status.draft { background: #fff4d6; color: #b26a00; }
 .order-draft .status.draft .s-dot { background: #b26a00; }
 
+/* ---------- Read / unread orders (مقروءة وغير مقروءة) ---------- */
+tr.order-unread td { background: #f4f9ff; }
+tr.order-unread:hover td { background: #e9f2ff; }
+.order-num { white-space: nowrap; }
+.unread-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #0a6cff; margin-inline-end: 8px; vertical-align: middle; }
+.ord-actions { white-space: nowrap; }
+.read-col, .read-cell { width: 58px; text-align: center; padding-left: 8px; padding-right: 8px; }
+.read-cell { vertical-align: middle; }
+.read-check {
+  width: 30px; height: 30px; padding: 0; border-radius: 9px;
+  border: 1.5px solid var(--line-strong); background: var(--surface);
+  color: transparent; transition: background .15s, border-color .15s, color .15s, transform .1s;
+}
+.read-check svg { width: 18px; height: 18px; }
+.read-check:hover { border-color: #27a36b; color: #9bd8bb; background: #f3fbf7; transform: scale(1.06); }
+.read-check.is-read { border-color: #27a36b; background: #27a36b; color: #fff; }
+.read-check.is-read:hover { background: #1e8a58; color: #fff; }
+.read-check:active { transform: scale(.94); }
+.tab-count {
+  display: inline-block; min-width: 18px; padding: 0 5px; margin-right: 5px;
+  border-radius: 9px; background: #0a6cff; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1.6; text-align: center;
+}
+.tab-count[hidden] { display: none; }
+
+/* ---------- Orders: full-screen table (no sidebar) ---------- */
+body.fullscreen-orders .sidebar { display: none; }
+body.fullscreen-orders .topbar { display: none; }
+body.fullscreen-orders .main { height: 100vh; }
+body.fullscreen-orders #content.content-full {
+  padding: 20px 24px 24px; max-width: none;
+  height: 100vh; overflow: auto;
+}
+body.fullscreen-orders .order-table { min-width: 0; width: 100%; table-layout: fixed; }
+body.fullscreen-orders .order-table th,
+body.fullscreen-orders .order-table td { padding: 10px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.fullscreen-orders .table-wrap { overflow-x: visible; }
+body.fullscreen-orders .page-head { margin-bottom: 16px; }
+body.fullscreen-orders #ord-back { background: #27a36b; border-color: #27a36b; color: #fff; }
+body.fullscreen-orders #ord-back:hover { background: #1e8a58; border-color: #1e8a58; color: #fff; }
+
 /* ---------- Google Sheets-style spreadsheet (اكسل) ---------- */
 .gs-card { padding: 0; overflow: hidden; }
 
