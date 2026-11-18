@@ -374,6 +374,20 @@ tr.order-unread:hover td { background: #e9f2ff; }
 }
 .tab-count[hidden] { display: none; }
 
+/* ---------- Orders: full-screen table (no sidebar) ---------- */
+body.fullscreen-orders .sidebar { display: none; }
+body.fullscreen-orders .topbar { display: none; }
+body.fullscreen-orders .main { height: 100vh; }
+body.fullscreen-orders #content.content-full {
+  padding: 20px 24px 24px; max-width: none;
+  height: 100vh; overflow: auto;
+}
+body.fullscreen-orders .order-table { min-width: 0; width: 100%; table-layout: fixed; }
+body.fullscreen-orders .order-table th,
+body.fullscreen-orders .order-table td { padding: 10px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.fullscreen-orders .table-wrap { overflow-x: visible; }
+body.fullscreen-orders .page-head { margin-bottom: 16px; }
+
 /* ---------- Google Sheets-style spreadsheet (اكسل) ---------- */
 .gs-card { padding: 0; overflow: hidden; }
 

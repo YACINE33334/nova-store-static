@@ -1160,6 +1160,7 @@
           <p>إدارة ومتابعة طلبات المتجر</p>
         </div>
         <div class="page-head-actions">
+          <button class="btn btn-secondary btn-sm" id="ord-back">← العودة للوحة التحكم</button>
           <button class="btn btn-secondary btn-sm" id="ord-read-all">✓ تحديد الكل كمقروء</button>
           <button class="btn btn-secondary btn-sm" id="ord-export">تصدير CSV</button>
         </div>
@@ -1195,6 +1196,11 @@
         </div>
         <div class="table-wrap">
           <table class="table order-table">
+            <colgroup>
+              <col style="width:5%"><col style="width:7%"><col style="width:12%"><col style="width:11%">
+              <col style="width:9%"><col style="width:16%"><col style="width:10%"><col style="width:7%">
+              <col style="width:5%"><col style="width:7%"><col style="width:10%"><col style="width:6%"><col style="width:5%">
+            </colgroup>
             <thead><tr><th class="read-col" title="مقروء / غير مقروء">✓</th><th>رقم الطلب</th><th>المنتج</th><th>الزبون</th><th>الهاتف</th><th>العنوان</th><th>المدينة</th><th>الرمز البريدي</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
             <tbody id="ord-tbody"></tbody>
           </table>
@@ -1262,6 +1268,7 @@
     $('#ord-search').addEventListener('input', (e) => { search = e.target.value.trim(); renderRows(); });
     $('#ord-date').addEventListener('change', (e) => { dateFilter = e.target.value; renderRows(); });
     $('#ord-prod').addEventListener('change', (e) => { prodFilter = e.target.value; renderRows(); });
+    $('#ord-back').addEventListener('click', () => { location.hash = '#overview'; });
     $('#ord-export').addEventListener('click', () => toast('تم تصدير الطلبات', 'success'));
     $('#ord-read-all').addEventListener('click', async () => {
       const targets = liveOrders.filter((o) => !isRead(o));
@@ -1732,7 +1739,8 @@
     $$('.nav-item[data-view]').forEach((n) => n.classList.toggle('active', n.dataset.view === view));
     const nav = $('#content');
     document.body.classList.toggle('excel-mode', view === 'excel');
-    nav.classList.toggle('content-full', view === 'excel');
+    document.body.classList.toggle('fullscreen-orders', view === 'orders');
+    nav.classList.toggle('content-full', view === 'excel' || view === 'orders');
     if (views[view]) views[view]();
     else views.overview();
   }
