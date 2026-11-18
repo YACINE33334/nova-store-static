@@ -127,6 +127,21 @@
     { id: '#10277', customer: 'فهد العنزي', email: 'fahad@sample.com', date: '2 سبتمبر', total: 190.0, status: 'delivered', items: 2 },
   ];
   let liveOrders = [];
+  /* Sequential display numbers: the oldest order is 1, then 2, 3 …
+     The real database id stays in data-order / ids[] so delete & save
+     still target the correct row. */
+  let orderNumbers = new Map();
+  function setLiveOrders(list) {
+    liveOrders = Array.isArray(list) ? list : [];
+    orderNumbers = new Map();
+    liveOrders.slice()
+      .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
+      .forEach((o, i) => orderNumbers.set(Number(o.id), i + 1));
+  }
+  function orderNo(o) {
+    const n = orderNumbers.get(Number(o && o.id));
+    return n != null ? n : (o && (o.code || o.id));
+  }
   function allOrders() { return liveOrders.concat(seedOrders); }
   const pendingOrdersCount = () => allOrders().filter((o) => o.status === 'pending' || o.status === 'processing').length;
 
@@ -486,7 +501,7 @@
       : fmtOrderDate(o);
     return `
       <tr data-order="${o.id}"${o.status === 'draft' ? ' class="order-draft"' : ''}>
-        <td class="cell-strong">${o.code || o.id}</td>
+        <td class="cell-strong">${orderNo(o)}</td>
         <td><div class="cu-name">${escapeHTML(o.productName || '')}</div><div class="cu-opt">id ${o.productId != null ? o.productId : ''}</div></td>
         <td><div class="customer-cell"><span class="avatar" style="background:${avatarColor(cust)}">${String(cust || '?').charAt(0)}</span><div class="cu-name">${escapeHTML(cust)}</div></div></td>
         <td class="cell-num">${escapeHTML(o.phone || '')}</td>
@@ -523,12 +538,12 @@
     ovl.innerHTML = `
       <div class="modal">
         <div class="modal-head">
-          <h3>تفاصيل الطلب ${escapeHTML(o.code || o.id)}</h3>
+          <h3>تفاصيل الطلب ${escapeHTML(orderNo(o))}</h3>
           <button class="modal-x" aria-label="إغلاق" data-close>&times;</button>
         </div>
         <div class="modal-body">
           <div class="od-grid">
-            ${item('رقم الطلب', escapeHTML(o.code || o.id))}
+            ${item('رقم الطلب', escapeHTML(orderNo(o)))}
             ${item('المنتج', escapeHTML(o.productName || ''))}
             ${item('الكمية', fmtOrderItems(o))}
             ${item('الإجمالي', fmtMoney(fmtOrderTotal(o)))}
@@ -820,7 +835,7 @@
 
     fetch('/api/orders', { cache: 'no-store' })
       .then((r) => r.json())
-      .then((list) => { if (Array.isArray(list)) { orders = list; liveOrders = list; render(); } })
+      .then((list) => { if (Array.isArray(list)) { orders = list; setLiveOrders(list); render(); } })
       .catch(() => render());
     $('#an-period').addEventListener('change', (e) => { period = e.target.value; render(); });
     $('#an-download').addEventListener('click', () => {
@@ -829,7 +844,7 @@
       const rows = [['رقم الطلب', 'المنتج', 'الزبون', 'الهاتف', 'العنوان', 'المدينة', 'الرمز البريدي', 'الكمية', 'الإجمالي', 'الحالة', 'التاريخ']];
       orders.forEach((o) => {
         const g = orderGeo(o);
-        rows.push([o.code || o.id, o.productName || '', o.name || o.customer || '', o.phone || '',
+        rows.push([orderNo(o), o.productName || '', o.name || o.customer || '', o.phone || '',
           g.address + (o.piso ? ', ' + o.piso : ''), g.city || '', g.zip || '',
           fmtOrderItems(o), fmtOrderTotal(o), statusNames[o.status] || o.status, o.createdAt ? new Date(o.createdAt).toLocaleString('ar-EG') : '']);
       });
@@ -1193,7 +1208,7 @@
         const okTab = orderFilter === 'all' || o.status === orderFilter;
         const okDate = inDateRange(o);
         const okProd = prodFilter === 'all' || String(o.productId) === prodFilter;
-        const hay = (o.code || o.id) + ' ' + (o.customer || o.name || '') + ' ' + (o.phone || '') + ' ' + (o.productName || '');
+        const hay = orderNo(o) + ' ' + (o.customer || o.name || '') + ' ' + (o.phone || '') + ' ' + (o.productName || '');
         const okSearch = !search || hay.includes(search);
         return okTab && okDate && okProd && okSearch;
       });
@@ -1204,7 +1219,7 @@
       .then((r) => r.json())
       .then((list) => {
         if (Array.isArray(list)) {
-          liveOrders = list;
+          setLiveOrders(list);
           const prodSel = $('#ord-prod');
           const names = {};
           list.forEach((o) => { if (o.productId != null && o.productName && !names[o.productId]) names[o.productId] = o.productName; });
@@ -1233,16 +1248,17 @@
         if (delBtn) {
           const oid = Number(delBtn.dataset.delOrder);
           const found = liveOrders.find((o) => o.id === oid);
+          const removedNo = found ? orderNo(found) : oid;
           showConfirm({
             title: 'حذف الطلب',
-            message: 'هل تريد فعلًا حذف الطلب #' + oid + (found && found.code ? ' (' + found.code + ')' : '') + ' نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.',
+            message: 'هل تريد فعلًا حذف الطلب رقم ' + removedNo + ' نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.',
             confirmText: 'حذف نهائيًا',
             danger: true,
             onConfirm: async () => {
               try {
                 await apiDeleteOrder(oid);
-                liveOrders = liveOrders.filter((o) => o.id !== oid);
-                toast('تم حذف الطلب #' + oid, 'success');
+                setLiveOrders(liveOrders.filter((o) => o.id !== oid));
+                toast('تم حذف الطلب رقم ' + removedNo, 'success');
                 renderRows();
               } catch (err) {
                 toast('تعذر حذف الطلب: ' + (err && err.message ? err.message : err), 'error');
@@ -1336,7 +1352,7 @@
       list.forEach((o, r) => {
         const g = orderGeo(o);
         const vals = [
-          o.code || String(o.id), o.productName || '', o.name || o.customer || '', o.phone || '',
+          String(orderNo(o)), o.productName || '', o.name || o.customer || '', o.phone || '',
           g.address || '', o.piso || '', g.city || '', g.zip || '', o.province || '',
           fmtOrderItems(o), fmtMoney(fmtOrderTotal(o)), o.status || 'pending', fmtOrderDate(o),
         ];
@@ -1349,8 +1365,10 @@
     }
 
     const orderNumber = (o) => {
-      const m = String(o.code || '').match(/\d+/);
-      return m ? Number(m[0]) : Number(o.id);
+      const n = Number(orderNo(o));
+      if (Number.isFinite(n)) return n;
+      const m = String((o && o.code) || '').match(/\d+/);
+      return m ? Number(m[0]) : Number(o && o.id) || 0;
     };
     const parseNum = (s) => {
       s = String(s == null ? '' : s).replace(/\D/g, '');
@@ -1692,7 +1710,7 @@
         .then((r) => r.json())
         .then((list) => {
           if (Array.isArray(list)) {
-            liveOrders = list;
+            setLiveOrders(list);
             refreshBadge();
           }
         })
