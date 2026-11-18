@@ -352,8 +352,8 @@ tr.order-draft:hover td { background: #faf0d8; }
 /* ---------- Read / unread orders (مقروءة وغير مقروءة) ---------- */
 tr.order-unread td { background: #f4f9ff; }
 tr.order-unread:hover td { background: #e9f2ff; }
-.order-num { display: flex; align-items: center; gap: 8px; }
-.unread-dot { width: 7px; height: 7px; border-radius: 50%; background: #0a6cff; flex: 0 0 auto; }
+.order-num { white-space: nowrap; }
+.unread-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #0a6cff; margin-inline-end: 8px; vertical-align: middle; }
 .ord-actions { white-space: nowrap; }
 .read-col, .read-cell { width: 58px; text-align: center; padding-left: 8px; padding-right: 8px; }
 .read-cell { vertical-align: middle; }
