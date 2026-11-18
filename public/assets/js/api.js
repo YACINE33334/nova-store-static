@@ -75,6 +75,8 @@
     out.createdAt = row.created_at;
     out.updatedAt = row.updated_at;
     if (out.code == null && row.id != null) out.code = '#' + row.id;
+    /* Unread by default; always expose a real boolean to the admin UI. */
+    out.read = (d.read === true || d.read === 'true' || d.read === 1 || d.read === '1');
     return out;
   }
   function rowData(row) {
@@ -366,6 +368,8 @@
         var all = Array.isArray(body) ? body : (body && body.updates);
         if (!Array.isArray(all)) return Promise.resolve(mkResp(400, { error: 'Expected an array of order updates' }, url));
         var ALLOWED = ['name', 'phone', 'address', 'piso', 'city', 'zip', 'province', 'status'];
+        /* read must stay a boolean inside data, never a string like "false". */
+        var BOOL_ALLOWED = ['read'];
         var tasks = [];
         var changed = 0;
         all.forEach(function (u) {
@@ -375,6 +379,9 @@
           var np = {};
           ALLOWED.forEach(function (k) {
             if (patch[k] !== undefined) np[k] = String(patch[k] == null ? '' : patch[k]).trim();
+          });
+          BOOL_ALLOWED.forEach(function (k) {
+            if (patch[k] !== undefined) np[k] = (patch[k] === true || patch[k] === 'true' || patch[k] === 1 || patch[k] === '1');
           });
           if (!Object.keys(np).length) return;
           tasks.push(

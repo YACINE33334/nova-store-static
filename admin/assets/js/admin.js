@@ -191,6 +191,20 @@
   const apiDeleteProduct = (id) => apiFetch('/api/products?id=' + id, { method: 'DELETE' });
   const apiDeleteOrder = (id) => apiFetch('/api/orders?id=' + id, { method: 'DELETE' });
 
+  /* ---------------- Read / unread flags (persisted in Supabase data.read) ---------------- */
+  const isRead = (o) => !!(o && (o.read === true || o.read === 'true' || o.read === 1 || o.read === '1'));
+  const patchOrders = (updates) => apiFetch('/api/orders', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ updates: updates }),
+  });
+  const apiSetOrderRead = (id, read) => patchOrders([{ id: id, patch: { read: !!read } }]);
+  function readIcon(read) {
+    return read
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.8"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 6.2A10.6 10.6 0 0 1 12 6c6.4 0 10 6 10 6a17.5 17.5 0 0 1-3.3 3.8M6.3 7.8C3.7 9.4 2 12 2 12s3.6 6 10 6a10.6 10.6 0 0 0 3.8-.7"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  }
+
   function toAdminRow(p) {
     const s = productSeed.find((x) => x.id === Number(p.id)) || {};
     const out = Object.assign({}, p);
@@ -499,9 +513,11 @@
     const dateCell = (o.status === 'draft')
       ? `<div>${fmtLeadActivity(o)}</div><div class="cu-opt">غير مكتمل</div>`
       : fmtOrderDate(o);
+    const read = isRead(o);
+    const rowClass = [o.status === 'draft' ? 'order-draft' : '', read ? '' : 'order-unread'].filter(Boolean).join(' ');
     return `
-      <tr data-order="${o.id}"${o.status === 'draft' ? ' class="order-draft"' : ''}>
-        <td class="cell-strong">${orderNo(o)}</td>
+      <tr data-order="${o.id}"${rowClass ? ' class="' + rowClass + '"' : ''}>
+        <td class="cell-strong order-num">${read ? '' : '<span class="unread-dot" title="غير مقروء"></span>'}${orderNo(o)}</td>
         <td><div class="cu-name">${escapeHTML(o.productName || '')}</div><div class="cu-opt">id ${o.productId != null ? o.productId : ''}</div></td>
         <td><div class="customer-cell"><span class="avatar" style="background:${avatarColor(cust)}">${String(cust || '?').charAt(0)}</span><div class="cu-name">${escapeHTML(cust)}</div></div></td>
         <td class="cell-num">${escapeHTML(o.phone || '')}</td>
@@ -512,7 +528,10 @@
         <td class="cell-strong">${fmtMoney(fmtOrderTotal(o))}</td>
         <td>${dateCell}</td>
         <td>${statusBadge(o.status)}</td>
-        <td><button type="button" class="btn btn-danger btn-sm" data-del-order="${o.id}" title="حذف الطلب">&times; حذف</button></td>
+        <td class="ord-actions">
+          <button type="button" class="btn btn-sm read-toggle ${read ? 'is-read' : 'is-unread'}" data-read-order="${o.id}" title="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}" aria-label="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}">${readIcon(read)}</button>
+          <button type="button" class="btn btn-danger btn-sm" data-del-order="${o.id}" title="حذف الطلب">&times; حذف</button>
+        </td>
       </tr>`;
   }
 
@@ -1145,6 +1164,7 @@
           <p>إدارة ومتابعة طلبات المتجر</p>
         </div>
         <div class="page-head-actions">
+          <button class="btn btn-secondary btn-sm" id="ord-read-all">✓ تحديد الكل كمقروء</button>
           <button class="btn btn-secondary btn-sm" id="ord-export">تصدير CSV</button>
         </div>
       </div>
@@ -1153,6 +1173,7 @@
         <div class="toolbar">
           <div class="tabs">
             <button class="tab active" data-tab="all">الكل</button>
+            <button class="tab" data-tab="unread">غير مقروئة <span class="tab-count" id="ord-unread-count" hidden>0</span></button>
             <button class="tab" data-tab="draft">غير مكتملة</button>
             <button class="tab" data-tab="pending">قيد الانتظار</button>
             <button class="tab" data-tab="processing">قيد المعالجة</button>
@@ -1188,6 +1209,8 @@
     let search = '';
     let dateFilter = 'all';
     let prodFilter = 'all';
+    /* Keep the highlighted tab in sync when returning to this view. */
+    $$('[data-tab]', el).forEach((t) => t.classList.toggle('active', t.dataset.tab === orderFilter));
 
     const inDateRange = (o) => {
       if (dateFilter === 'all') return true;
@@ -1204,8 +1227,11 @@
 
     function renderRows() {
       const tb = $('#ord-tbody');
+      const unreadN = liveOrders.filter((o) => !isRead(o)).length;
+      const badge = $('#ord-unread-count');
+      if (badge) { badge.textContent = String(unreadN); badge.hidden = !unreadN; }
       const list = liveOrders.filter((o) => {
-        const okTab = orderFilter === 'all' || o.status === orderFilter;
+        const okTab = orderFilter === 'all' || (orderFilter === 'unread' ? !isRead(o) : o.status === orderFilter);
         const okDate = inDateRange(o);
         const okProd = prodFilter === 'all' || String(o.productId) === prodFilter;
         const hay = orderNo(o) + ' ' + (o.customer || o.name || '') + ' ' + (o.phone || '') + ' ' + (o.productName || '');
@@ -1241,9 +1267,41 @@
     $('#ord-date').addEventListener('change', (e) => { dateFilter = e.target.value; renderRows(); });
     $('#ord-prod').addEventListener('change', (e) => { prodFilter = e.target.value; renderRows(); });
     $('#ord-export').addEventListener('click', () => toast('تم تصدير الطلبات', 'success'));
+    $('#ord-read-all').addEventListener('click', async () => {
+      const targets = liveOrders.filter((o) => !isRead(o));
+      if (!targets.length) { toast('كل الطلبات مقروءة بالفعل'); return; }
+      const before = targets.map((o) => o.read);
+      targets.forEach((o) => { o.read = true; });
+      renderRows();
+      try {
+        await patchOrders(targets.map((o) => ({ id: o.id, patch: { read: true } })));
+        toast('تم تحديد ' + targets.length + ' طلب كمقروء', 'success');
+      } catch (err) {
+        targets.forEach((o, i) => { o.read = before[i]; });
+        renderRows();
+        toast('تعذر الحفظ: ' + (err && err.message ? err.message : err), 'error');
+      }
+    });
     const tbody = $('#ord-tbody');
     if (tbody) {
       tbody.addEventListener('click', (e) => {
+        const readBtn = e.target.closest('[data-read-order]');
+        if (readBtn) {
+          const oid = Number(readBtn.dataset.readOrder);
+          const found = liveOrders.find((o) => o.id === oid);
+          if (!found) return;
+          const next = !isRead(found);
+          found.read = next;
+          renderRows();
+          apiSetOrderRead(oid, next)
+            .then(() => toast(next ? 'تم تحديد الطلب كمقروء' : 'تم تحديد الطلب كغير مقروء', 'success'))
+            .catch((err) => {
+              found.read = !next;
+              renderRows();
+              toast('تعذر حفظ الحالة: ' + (err && err.message ? err.message : err), 'error');
+            });
+          return;
+        }
         const delBtn = e.target.closest('[data-del-order]');
         if (delBtn) {
           const oid = Number(delBtn.dataset.delOrder);

@@ -349,6 +349,22 @@ tr.order-draft:hover td { background: #faf0d8; }
 .order-draft .status.draft { background: #fff4d6; color: #b26a00; }
 .order-draft .status.draft .s-dot { background: #b26a00; }
 
+/* ---------- Read / unread orders (مقروءة وغير مقروءة) ---------- */
+tr.order-unread td { background: #f4f9ff; }
+tr.order-unread:hover td { background: #e9f2ff; }
+.order-num { display: flex; align-items: center; gap: 8px; }
+.unread-dot { width: 7px; height: 7px; border-radius: 50%; background: #0a6cff; flex: 0 0 auto; }
+.ord-actions { white-space: nowrap; }
+.read-toggle { min-width: 34px; padding: 7px 9px; }
+.read-toggle.is-unread { color: #0a6cff; border-color: #bcd6ff; background: #eff6ff; }
+.read-toggle.is-read { color: var(--ink-muted); }
+.tab-count {
+  display: inline-block; min-width: 18px; padding: 0 5px; margin-right: 5px;
+  border-radius: 9px; background: #0a6cff; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1.6; text-align: center;
+}
+.tab-count[hidden] { display: none; }
+
 /* ---------- Google Sheets-style spreadsheet (اكسل) ---------- */
 .gs-card { padding: 0; overflow: hidden; }
 
