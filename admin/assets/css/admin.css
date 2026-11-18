@@ -355,9 +355,18 @@ tr.order-unread:hover td { background: #e9f2ff; }
 .order-num { display: flex; align-items: center; gap: 8px; }
 .unread-dot { width: 7px; height: 7px; border-radius: 50%; background: #0a6cff; flex: 0 0 auto; }
 .ord-actions { white-space: nowrap; }
-.read-toggle { min-width: 34px; padding: 7px 9px; }
-.read-toggle.is-unread { color: #0a6cff; border-color: #bcd6ff; background: #eff6ff; }
-.read-toggle.is-read { color: var(--ink-muted); }
+.read-col, .read-cell { width: 58px; text-align: center; padding-left: 8px; padding-right: 8px; }
+.read-cell { vertical-align: middle; }
+.read-check {
+  width: 30px; height: 30px; padding: 0; border-radius: 9px;
+  border: 1.5px solid var(--line-strong); background: var(--surface);
+  color: transparent; transition: background .15s, border-color .15s, color .15s, transform .1s;
+}
+.read-check svg { width: 18px; height: 18px; }
+.read-check:hover { border-color: #27a36b; color: #9bd8bb; background: #f3fbf7; transform: scale(1.06); }
+.read-check.is-read { border-color: #27a36b; background: #27a36b; color: #fff; }
+.read-check.is-read:hover { background: #1e8a58; color: #fff; }
+.read-check:active { transform: scale(.94); }
 .tab-count {
   display: inline-block; min-width: 18px; padding: 0 5px; margin-right: 5px;
   border-radius: 9px; background: #0a6cff; color: #fff;

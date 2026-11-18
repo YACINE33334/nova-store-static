@@ -199,11 +199,7 @@
     body: JSON.stringify({ updates: updates }),
   });
   const apiSetOrderRead = (id, read) => patchOrders([{ id: id, patch: { read: !!read } }]);
-  function readIcon(read) {
-    return read
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.8"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 6.2A10.6 10.6 0 0 1 12 6c6.4 0 10 6 10 6a17.5 17.5 0 0 1-3.3 3.8M6.3 7.8C3.7 9.4 2 12 2 12s3.6 6 10 6a10.6 10.6 0 0 0 3.8-.7"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
-  }
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 
   function toAdminRow(p) {
     const s = productSeed.find((x) => x.id === Number(p.id)) || {};
@@ -517,6 +513,9 @@
     const rowClass = [o.status === 'draft' ? 'order-draft' : '', read ? '' : 'order-unread'].filter(Boolean).join(' ');
     return `
       <tr data-order="${o.id}"${rowClass ? ' class="' + rowClass + '"' : ''}>
+        <td class="read-cell">
+          <button type="button" class="read-check ${read ? 'is-read' : 'is-unread'}" data-read-order="${o.id}" title="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}" aria-label="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}" aria-pressed="${read}">${CHECK_ICON}</button>
+        </td>
         <td class="cell-strong order-num">${read ? '' : '<span class="unread-dot" title="غير مقروء"></span>'}${orderNo(o)}</td>
         <td><div class="cu-name">${escapeHTML(o.productName || '')}</div><div class="cu-opt">id ${o.productId != null ? o.productId : ''}</div></td>
         <td><div class="customer-cell"><span class="avatar" style="background:${avatarColor(cust)}">${String(cust || '?').charAt(0)}</span><div class="cu-name">${escapeHTML(cust)}</div></div></td>
@@ -528,10 +527,7 @@
         <td class="cell-strong">${fmtMoney(fmtOrderTotal(o))}</td>
         <td>${dateCell}</td>
         <td>${statusBadge(o.status)}</td>
-        <td class="ord-actions">
-          <button type="button" class="btn btn-sm read-toggle ${read ? 'is-read' : 'is-unread'}" data-read-order="${o.id}" title="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}" aria-label="${read ? 'تحديد كغير مقروء' : 'تحديد كمقروء'}">${readIcon(read)}</button>
-          <button type="button" class="btn btn-danger btn-sm" data-del-order="${o.id}" title="حذف الطلب">&times; حذف</button>
-        </td>
+        <td class="ord-actions"><button type="button" class="btn btn-danger btn-sm" data-del-order="${o.id}" title="حذف الطلب">&times; حذف</button></td>
       </tr>`;
   }
 
@@ -1199,7 +1195,7 @@
         </div>
         <div class="table-wrap">
           <table class="table order-table">
-            <thead><tr><th>رقم الطلب</th><th>المنتج</th><th>الزبون</th><th>الهاتف</th><th>العنوان</th><th>المدينة</th><th>الرمز البريدي</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <thead><tr><th class="read-col" title="مقروء / غير مقروء">✓</th><th>رقم الطلب</th><th>المنتج</th><th>الزبون</th><th>الهاتف</th><th>العنوان</th><th>المدينة</th><th>الرمز البريدي</th><th>الكمية</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
             <tbody id="ord-tbody"></tbody>
           </table>
         </div>
@@ -1238,7 +1234,7 @@
         const okSearch = !search || hay.includes(search);
         return okTab && okDate && okProd && okSearch;
       });
-      tb.innerHTML = list.length ? list.map(orderRow).join('') : `<tr><td colspan="12"><div class="empty">لا توجد طلبات مطابقة</div></td></tr>`;
+      tb.innerHTML = list.length ? list.map(orderRow).join('') : `<tr><td colspan="13"><div class="empty">لا توجد طلبات مطابقة</div></td></tr>`;
     }
     renderRows();
     fetch('/api/orders', { cache: 'no-store' })
