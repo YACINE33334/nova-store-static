@@ -43,17 +43,21 @@
 
   const $ = (sel, scope) => (scope || document).querySelector(sel);
 
-  /* ---------------- provincias de la España peninsular ----------------
-     (sin Baleares, Canarias, Ceuta ni Melilla: solo península) */
+  /* ---------------- lista de provincias / regiones ---------------- */
   const PROVINCIAS = [
-    'A Coruña', 'Albacete', 'Alicante', 'Almería', 'Araba/Álava', 'Asturias', 'Badajoz',
-    'Barcelona', 'Bizkaia', 'Burgos', 'Cantabria', 'Castellón',
-    'Ciudad Real', 'Cuenca', 'Cáceres', 'Cádiz', 'Córdoba', 'Gipuzkoa', 'Girona',
-    'Granada', 'Guadalajara', 'Huelva', 'Huesca', 'Jaén', 'La Rioja',
-    'León', 'Lleida', 'Lugo', 'Madrid', 'Murcia', 'Málaga',
-    'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca',
-    'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo', 'Valencia',
-    'Valladolid', 'Zamora', 'Zaragoza', 'Ávila',
+    'A Coruña', 'Álaba', 'Albacete', 'Alicante', 'Almería',
+    'Andalusia', 'Aragon', 'Asturias', 'Ávila', 'Badajoz',
+    'Balears', 'Barcelona', 'Basque Country', 'Bizkaia', 'Burgos',
+    'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Castille-La Mancha',
+    'Castille-Leon', 'Catalonia', 'Ciudad Real', 'Córdoba', 'Cuenca',
+    'Extremadura', 'Galicia', 'Girona', 'Granada', 'Guadalajara',
+    'Guipúzcoa', 'Huelva', 'Huesca', 'Jaén', 'La Rioja',
+    'Leon', 'Lleida', 'Lugo', 'Madrid', 'Malaga',
+    'Marbella', 'Murcia', 'Navarra', 'Navarre', 'Ourense',
+    'Palencia', 'Palma', 'Pontevedra', 'Salamanca', 'Santander',
+    'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel',
+    'Toledo', 'Valencia', 'Valladolid', 'Vitoria-Gasteiz', 'Vizcaya',
+    'Zamora', 'Zaragoza',
   ];
 
   function provinceOptions() {
