@@ -387,6 +387,8 @@ body.fullscreen-orders .order-table th,
 body.fullscreen-orders .order-table td { padding: 10px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 body.fullscreen-orders .table-wrap { overflow-x: visible; }
 body.fullscreen-orders .page-head { margin-bottom: 16px; }
+body.fullscreen-orders #ord-back { background: #27a36b; border-color: #27a36b; color: #fff; }
+body.fullscreen-orders #ord-back:hover { background: #1e8a58; border-color: #1e8a58; color: #fff; }
 
 /* ---------- Google Sheets-style spreadsheet (اكسل) ---------- */
 .gs-card { padding: 0; overflow: hidden; }
