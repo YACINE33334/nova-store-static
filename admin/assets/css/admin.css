@@ -390,6 +390,31 @@ body.fullscreen-orders .page-head { margin-bottom: 16px; }
 body.fullscreen-orders #ord-back { background: #27a36b; border-color: #27a36b; color: #fff; }
 body.fullscreen-orders #ord-back:hover { background: #1e8a58; border-color: #1e8a58; color: #fff; }
 
+/* ---------- Accounts section (الحسابات) ---------- */
+.calc-card { padding: 0; overflow: hidden; margin: 0; }
+.calc-frame { display: block; width: 100%; height: 100%; border: 0; background: #f4f5f7; }
+
+/* Fullscreen mode: the calculator IS the section (like excel/orders) */
+body.accounts-mode .topbar { display: none; }
+body.accounts-mode .main { height: 100vh; }
+body.accounts-mode #content.content-full {
+  padding: 0; max-width: none; height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+body.accounts-mode #content.content-full .page-head {
+  flex: 0 0 auto; margin: 0; padding: 14px 24px 12px;
+}
+body.accounts-mode #content.content-full .page-head h1 { font-size: 18px; }
+body.accounts-mode #content.content-full .page-head p { font-size: 12px; }
+body.accounts-mode .calc-card {
+  flex: 1 1 auto; min-height: 0; border: none; border-radius: 0; box-shadow: none;
+}
+@media (max-width: 900px) {
+  body.accounts-mode .topbar { display: flex; }
+  body.accounts-mode #content.content-full,
+  body.accounts-mode .main { height: calc(100vh - 64px); }
+}
+
 /* ---------- Google Sheets-style spreadsheet (اكسل) ---------- */
 .gs-card { padding: 0; overflow: hidden; }
 
