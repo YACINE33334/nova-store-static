@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حاسبة ربح COD | متجر أوروبي</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#fff; --border:#e5e7eb; --text:#1f2937; --muted:#6b7280;
+  --accent:#9f6f38; --accent-2:#ca9d68; --accent-bg:#faf3ea;
+  --danger:#dc2626; --danger-bg:#fef2f2; --ok:#16a34a; --ok-bg:#f0fdf4;
+  --warn:#d97706; --warn-bg:#fffbeb; --sidebar:#111827; --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Segoe UI","Tajawal",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.topbar{background:var(--sidebar);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topbar h1{font-size:18px;margin:0}
+.topbar p{margin:0;color:#94a3b8;font-size:12px}
+.topbar .spacer{flex:1}
+.topbar a{color:#e2c39b;font-size:13px;text-decoration:none}
+.wrap{max-width:1280px;margin:0 auto;padding:20px}
+.hero{background:linear-gradient(135deg,#1f2937,#111827);color:#fff;border-radius:var(--radius);padding:22px 24px;display:flex;gap:26px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.hero .main{min-width:240px}
+.hero .label{color:#9ca3af;font-size:12px}
+.hero .big{font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1.15}
+.hero .big.pos{color:#4ade80}.hero .big.neg{color:#f87171}
+.hero .sub{color:#d1d5db;font-size:13px;margin-top:4px}
+.hero .mini{display:flex;gap:26px;flex-wrap:wrap;margin-inline-start:auto}
+.hero .mini div{min-width:120px}
+.hero .mini b{display:block;font-size:20px;margin-top:2px}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(340px,1fr);gap:18px;margin-top:18px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
+.card>h2{font-size:15px;padding:14px 18px;border-bottom:1px solid var(--border);margin:0;display:flex;align-items:center;gap:8px}
+.card>h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.card .body{padding:16px 18px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.field .hint{font-size:11px;color:#9ca3af;margin-top:3px}
+input[type=number],select{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;outline:none}
+input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.full{grid-column:1/-1}
+details{margin-top:14px;border-top:1px dashed var(--border);padding-top:10px}
+summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600}
+.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 14px;color:var(--text)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn:hover{filter:brightness(.97)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#fcfcfd}
+.kpi span{display:block;font-size:11.5px;color:var(--muted)}
+.kpi b{display:block;font-size:17px;margin-top:2px}
+.kpi b.pos,.kpi.pos b{color:var(--ok)}.kpi b.neg,.kpi.neg b{color:var(--danger)}
+.funnel{display:flex;gap:6px;flex-wrap:wrap;font-size:12px}
+.funnel span{background:var(--accent-bg);border:1px solid #ecdcc8;color:#7c5327;padding:4px 9px;border-radius:20px}
+.funnel span.bad{background:var(--danger-bg);border-color:#fecaca;color:#b91c1c}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 6px;border-bottom:1px solid #f0f1f3;text-align:start}
+th{color:var(--muted);font-weight:600;font-size:11.5px}
+td.n,th.n{text-align:end;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.bar{height:5px;background:var(--accent);border-radius:3px;min-width:2px}
+.barwrap{background:#f1f2f4;border-radius:3px;width:90px;height:5px;overflow:hidden}
+tr.total td{font-weight:700;border-top:2px solid var(--border);border-bottom:none;padding-top:10px}
+.note{font-size:11.5px;color:var(--muted);margin:10px 0 0;line-height:1.7}
+.alert{border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:12px}
+.alert.warn{background:var(--warn-bg);border:1px solid #fde68a;color:#92400e}
+.alert.ok{background:var(--ok-bg);border:1px solid #bbf7d0;color:#166534}
+.alert.bad{background:var(--danger-bg);border:1px solid #fecaca;color:#991b1b}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--border);background:#fff;border-radius:20px;padding:5px 11px;font-size:12px}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+footer{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 10px 30px;line-height:1.9}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.hero .mini{margin-inline-start:0}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div><h1>حاسبة ربح COD — محاكاة</h1><p>أسعار COD GROW لإسبانيا / البرتغال / إيطاليا — عدّل كل رقم حسب حالتك</p></div>
+  <div class="spacer"></div>
+  <a href="../admin/" target="_blank">لوحة الإدارة ↗</a>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="main">
+      <div class="label">صافي الربح المتوقع</div>
+      <div class="big" id="profitBig">—</div>
+      <div class="sub" id="profitSub">—</div>
+    </div>
+    <div class="mini">
+      <div><span class="label">الإيراد</span><b id="revenueMini">—</b></div>
+      <div><span class="label">التكلفة</span><b id="costMini">—</b></div>
+      <div><span class="label">ربح / قطعة مُسلّمة</span><b id="perMini">—</b></div>
+      <div><span class="label">العائد على التكلفة</span><b id="roiMini">—</b></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section>
+      <div class="card">
+        <h2><span class="dot"></span> المدخلات</h2>
+        <div class="body">
+          <div class="full" style="margin-bottom:14px">
+            <label for="market">السوق (يضبط الشحن ورسوم المرتجع تلقائياً)</label>
+            <select id="market">
+              <option value="es">إسبانيا / البرتغال — شحن 5.99 € | مرتجع 1 €</option>
+              <option value="it">إيطاليا — شحن 6.99 € | مرتجع 2.50 €</option>
+            </select>
+          </div>
+          <div class="grid">
+            <div class="field"><label for="price">سعر البيع (€)</label><input type="number" id="price" value="54" min="0" step="0.01"></div>
+            <div class="field"><label for="cost">تكلفة شراء المنتج ($)</label><input type="number" id="cost" value="0.5" min="0" step="0.01"></div>
+            <div class="field"><label for="rate">سعر الصرف USD → EUR</label><input type="number" id="rate" value="0.9114" min="0" step="0.0001"><div class="hint">1 دولار = 0.9114 يورو</div></div>
+            <div class="field"><label for="weight">الوزن (جم)</label><input type="number" id="weight" value="0.1" min="0" step="0.1"><div class="hint">تعرفة COD GROW للطرود أقل من 2 كجم</div></div>
+            <div class="field"><label for="leads">عدد العملاء المحتملين (Leads)</label><input type="number" id="leads" value="100" min="0" step="1"></div>
+            <div class="field"><label for="cpa">تكلفة العميل المحتمل CPA ($)</label><input type="number" id="cpa" value="9" min="0" step="0.01"></div>
+            <div class="field"><label for="conf">نسبة التأكيد %</label><input type="number" id="conf" value="60" min="0" max="100" step="1"></div>
+            <div class="field"><label for="deliv">نسبة التسليم % (من المؤكدة)</label><input type="number" id="deliv" value="60" min="0" max="100" step="1"></div>
+            <div class="field full"><label for="returnMode">قاعدة احتساب المرتجع</label>
+              <select id="returnMode">
+                <option value="confirmed">المؤكدة غير المُسلّمة فقط (24 من 100 في الحالة الافتراضية)</option>
+                <option value="all">كل طلبات غير المُسلّمة (64 من 100 في الحالة الافتراضية)</option>
+              </select>
+            </div>
+            <div class="field full"><label for="costBasis">تكلفة المنتج تُحتسب على</label>
+              <select id="costBasis">
+                <option value="all">كل العملاء المحتملين (الافتراضي الحالي)</option>
+                <option value="confirmed">الطلبات المؤكدة فقط</option>
+                <option value="delivered">الطلبات المُسلّمة فقط</option>
+              </select>
+              <div class="hint">الافتراضي الأصلي كان كل الـ 100 عميل — غيّره إذا ما تشتري البضاعة إلا بعد التأكيد/التسليم.</div>
+            </div>
+            <div class="field full"><label for="ccMode">رسوم الكول سنتر</label>
+              <select id="ccMode">
+                <option value="cumulative">تراكمية: 1 € للمؤكّد + 1.50 € للمُسلّم (الافتراضي الحالي)</option>
+                <option value="deliveredOnly">غير تراكمية: 1.50 € للمُسلّم فقط بدل رسوم المؤكّد</option>
+              </select>
+            </div>
+          </div>
+
+          <details>
+            <summary>رسوم COD GROW (عدّلها إذا اختلفت تسعيرتك) ⌄</summary>
+            <div class="grid" style="margin-top:12px">
+              <div class="field"><label for="ccLead">كول سنتر — Lead (€)</label><input type="number" id="ccLead" value="0" min="0" step="0.01"></div>
+              <div class="field"><label for="ccConf">كول سنتر — مؤكّد (€)</label><input type="number" id="ccConf" value="1" min="0" step="0.01"></div>
+              <div class="field"><label for="ccDeliv">كول سنتر — مُسلّم (€)</label><input type="number" id="ccDeliv" value="1.5" min="0" step="0.01"></div>
+              <div class="field"><label for="storage">تخزين (€ / مؤكّد)</label><input type="number" id="storage" value="0" min="0" step="0.01"></div>
+              <div class="field"><label for="fulfill">Fulfillment (€ / مؤكّد)</label><input type="number" id="fulfill" value="2" min="0" step="0.01"></div>
+              <div class="field"><label for="shipping">شحن (€ / مُسلّم)</label><input type="number" id="shipping" value="5.99" min="0" step="0.01"></div>
+              <div class="field"><label for="retFee">معالجة المرتجع (€ / طلب)</label><input type="number" id="retFee" value="1" min="0" step="0.01"></div>
+              <div class="field"><label for="codPct">رسوم COD % من الإيراد</label><input type="number" id="codPct" value="5" min="0" max="100" step="0.1"></div>
+              <div class="field"><label for="vatHandle">معالجة ضريبية COD (€ / مُسلّم)</label><input type="number" id="vatHandle" value="0" min="0" step="0.01"></div>
+              <div class="field"><label for="sub">اشتراك (€ / مُسلّم)</label><input type="number" id="sub" value="0" min="0" step="0.01"></div>
+            </div>
+          </details>
+
+          <details>
+            <summary>ضرائب وتكاليف إضافية اختيارية ⌄</summary>
+            <div class="grid" style="margin-top:12px">
+              <div class="field"><label for="vat">ضريبة مبيعات % (إسبانيا 21 / إيطاليا 22 / البرتغال 23)</label><input type="number" id="vat" value="0" min="0" max="100" step="0.1"><div class="hint">اتركها 0 إذا كان السعر شاملاً ولا تريد احتسابها</div></div>
+              <div class="field"><label for="duty">رسوم استيراد % من الإيراد</label><input type="number" id="duty" value="0" min="0" max="100" step="0.1"></div>
+              <div class="field full"><label for="extra">تكاليف ثابتة أخرى (€)</label><input type="number" id="extra" value="0" min="0" step="0.01"></div>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button class="btn primary" id="reset">إعادة للقيم الافتراضية</button>
+            <button class="btn" id="copy">نسخ ملخص النتيجة</button>
+            <div class="chips">
+              <button class="chip" data-preset="base">الوضع الحالي: 32 €</button>
+              <button class="chip" data-preset="target">الهدف: 54 €</button>
+              <button class="chip" data-preset="cpa6">تقليل CPA إلى 6 $</button>
+              <button class="chip" data-preset="d80">تسليم 80%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card"><h2><span class="dot"></span> النتيجة</h2><div class="body">
+        <div id="alert"></div>
+        <div class="funnel" id="funnel"></div>
+        <div class="kpis" style="margin-top:14px">
+          <div class="kpi" id="k-revenue"><span>الإيراد</span><b>—</b></div>
+          <div class="kpi" id="k-cost"><span>إجمالي التكلفة</span><b>—</b></div>
+          <div class="kpi" id="k-profit"><span>صافي الربح</span><b>—</b></div>
+          <div class="kpi" id="k-per"><span>ربح / قطعة مُسلّمة</span><b>—</b></div>
+          <div class="kpi" id="k-be"><span>سعر التعادل</span><b>—</b></div>
+          <div class="kpi" id="k-beCpa"><span>CPA التعادل ($)</span><b>—</b></div>
+          <div class="kpi" id="k-beDeliv"><span>تسليم مطلوب للتعادل</span><b>—</b></div>
+          <div class="kpi" id="k-roi"><span>العائد على التكلفة</span><b>—</b></div>
+        </div>
+      </div></div>
+
+      <div class="card"><h2><span class="dot"></span> تفصيل التكاليف</h2><div class="body">
+        <table><thead><tr><th>البند</th><th class="n">القيمة</th><th>النسبة</th></tr></thead><tbody id="breakdown"></tbody></table>
+      </div></div>
+
+      <div class="card"><h2><span class="dot"></span> مقارنة الأسعار</h2><div class="body">
+        <table><thead><tr><th>سعر البيع</th><th class="n">الربح</th><th class="n">/ قطعة</th></tr></thead><tbody id="priceTable"></tbody></table>
+        <p class="note">جميع الأرقام محسوبة بنفس نسبة التأكيد/التسليم ورسوم COD الحالية.</p>
+      </div></div>
+
+      <div class="card"><h2><span class="dot"></span> ماذا لو؟ (حساسية)</h2><div class="body">
+        <table><thead><tr><th>تغيير</th><th class="n">الربح</th></tr></thead><tbody id="sensTable"></tbody></table>
+      </div></div>
+    </aside>
+  </div>
+
+  <footer>
+    المصدر: ملف <b>COD GROW Service Fees</b> (7 صفحات) — إسبانيا/البرتغال: شحن 5.99 €، مرتجع 1 €؛ إيطاليا: شحن 6.99 €، مرتجع 2.50 €. التعرفة للطرود أقل من 2 كجم.<br>
+    «VAT: FREE» في الملف تعني أن COD GROW لا يفرض رسوم معالجة ضريبية؛ ضريبة المبيعات نفسها اختيارية في الحاسبة أعلاه.<br>
+    لا تشمل الحساسية تكاليف استيراد أو رسوم جمركية فعلية إلا إذا أدخلتها بنفسك.<br>
+    <b>الافتراضات المحاسبية القابلة للتعديل أعلاه:</b> تكلفة المنتج تُحتسب على كل الـ leads، رسوم الكول سنتر تراكمية، Fulfillment على الطلبات المؤكدة، الشحن ومعالجة الضريبة والاشتراك على المُسلّمة، ورسوم COD نسبة من الإيراد المحصّل.
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const MARKETS = {
+    es:{shipping:5.99, retFee:1},
+    it:{shipping:6.99, retFee:2.5}
+  };
+  const FIELDS = ['price','cost','rate','weight','leads','cpa','conf','deliv','ccLead','ccConf','ccDeliv','storage','fulfill','shipping','retFee','codPct','vatHandle','sub','vat','duty','extra'];
+  const DEFAULTS = {price:54,cost:0.5,rate:0.9114,weight:0.1,leads:100,cpa:9,conf:60,deliv:60,ccLead:0,ccConf:1,ccDeliv:1.5,storage:0,fulfill:2,shipping:5.99,retFee:1,codPct:5,vatHandle:0,sub:0,vat:0,duty:0,extra:0,market:'es',returnMode:'confirmed',costBasis:'all',ccMode:'cumulative'};
+  const v = id => { const n = parseFloat($(id).value); return Number.isFinite(n) ? n : 0; };
+  const money = n => (n<0?'-':'')+'€'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const num = n => n.toLocaleString('en-US',{maximumFractionDigits:2});
+  const pct = n => (n*100).toLocaleString('en-US',{maximumFractionDigits:1})+'%';
+  const set = (id,text,cls) => {
+    const el=$(id); el.textContent=text;
+    if(cls){ const target=el.querySelector('b')||el; target.className=cls; }
+  };
+
+  function calc(o){
+    const rate=o.rate||1;
+    const leads=o.leads, confirmed=leads*o.conf/100, delivered=confirmed*o.deliv/100;
+    const notDelivConfirmed=confirmed-delivered, nonDeliveredAll=leads-delivered;
+    const returnCount = o.returnMode==='all' ? nonDeliveredAll : notDelivConfirmed;
+    const revenue=delivered*o.price;
+    const variablePct=(o.codPct+o.vat+o.duty)/100;
+    const productCount = o.costBasis==='confirmed' ? confirmed : o.costBasis==='delivered' ? delivered : leads;
+    const ccConfCharge = o.ccMode==='deliveredOnly' ? 0 : confirmed;
+    const items=[
+      ['إعلانات فيسبوك ('+num(leads)+' × '+money(o.cpa*rate)+')', leads*o.cpa*rate],
+      ['تكلفة المنتج ('+num(productCount)+' × '+money(o.cost*rate)+')', productCount*o.cost*rate],
+      ['كول سنتر — Lead', leads*o.ccLead],
+      ['كول سنتر — مؤكّد ('+num(ccConfCharge)+')', ccConfCharge*o.ccConf],
+      ['كول سنتر — مُسلّم ('+num(delivered)+')', delivered*o.ccDeliv],
+      ['تخزين ('+num(confirmed)+')', confirmed*o.storage],
+      ['Fulfillment ('+num(confirmed)+')', confirmed*o.fulfill],
+      ['شحن ('+num(delivered)+')', delivered*o.shipping],
+      ['معالجة المرتجع ('+num(returnCount)+')', returnCount*o.retFee],
+      ['معالجة ضريبية COD', delivered*o.vatHandle],
+      ['اشتراك', delivered*o.sub],
+      ['رسوم COD '+num(o.codPct)+'%', revenue*o.codPct/100],
+      ['ضريبة مبيعات '+num(o.vat)+'%', revenue*o.vat/100],
+      ['رسوم استيراد '+num(o.duty)+'%', revenue*o.duty/100],
+      ['تكاليف إضافية', o.extra]
+    ];
+    const total=items.reduce((s,x)=>s+x[1],0);
+    const profit=revenue-total;
+    const fixed=items.filter((_,i)=>![11,12,13].includes(i)).reduce((s,x)=>s+x[1],0);
+    const bePrice = variablePct<1 ? fixed/(delivered*(1-variablePct)) : Infinity;
+    const adsCost=leads*o.cpa*rate;
+    const otherFixed=fixed-adsCost;
+    const beCpa = (revenue*(1-variablePct)-otherFixed)/(leads*rate);
+    // Required delivery rate at current confirmation: solve d*C*unit - A = 0
+    // A = كل التكاليف الثابتة عند تسليم صفر؛ unit = الربح الإضافي لكل طلب مُسلّم إضافي
+    const C=confirmed;
+    let A=adsCost + leads*o.ccLead + (o.ccMode==='deliveredOnly'?0:C*o.ccConf) + C*o.storage + C*o.fulfill + o.extra
+          + (o.returnMode==='all' ? leads*o.retFee : C*o.retFee);
+    if(o.costBasis==='all') A+=leads*o.cost*rate;
+    else if(o.costBasis==='confirmed') A+=C*o.cost*rate;
+    let unit=o.price*(1-variablePct)-o.ccDeliv-o.shipping-o.vatHandle-o.sub+o.retFee;
+    if(o.costBasis==='delivered') unit-=o.cost*rate;
+    const beDeliv = unit>0 && C>0 ? A/(C*unit) : Infinity;
+    return {leads,confirmed,delivered,notDelivConfirmed,nonDeliveredAll,returnCount,revenue,total,items,profit,per:delivered?profit/delivered:0,roi:total?profit/total*100:0,bePrice,beCpa,beDeliv,variablePct,rate};
+  }
+
+  function read(){
+    const o={}; FIELDS.forEach(f=>o[f]=v(f));
+    o.market=$('market').value; o.returnMode=$('returnMode').value;
+    o.costBasis=$('costBasis').value; o.ccMode=$('ccMode').value;
+    return o;
+  }
+
+  function render(){
+    const o=read(), r=calc(o);
+    set('profitBig', money(r.profit), 'big '+(r.profit>=0?'pos':'neg'));
+    set('profitSub', num(r.delivered)+' قطعة مُسلّمة من '+num(r.leads)+' عميل محتمل — '+num(o.conf)+'% تأكيد / '+num(o.deliv)+'% تسليم');
+    set('revenueMini', money(r.revenue)); set('costMini', money(r.total));
+    set('perMini', money(r.per)); set('roiMini', num(r.roi)+'%');
+
+    const cls=r.profit>=0?'pos':'neg';
+    set('k-revenue', money(r.revenue)); set('k-cost', money(r.total));
+    set('k-profit', money(r.profit), cls); set('k-per', money(r.per), cls);
+    set('k-be', Number.isFinite(r.bePrice)?money(r.bePrice):'غير ممكن');
+    set('k-beCpa', Number.isFinite(r.beCpa)?num(Math.max(0,r.beCpa)):'—');
+    const delivText = (Number.isFinite(r.beDeliv) && r.beDeliv<=1) ? pct(Math.max(0,r.beDeliv)) : 'غير ممكن';
+    set('k-beDeliv', delivText);
+    set('k-roi', num(r.roi)+'%', cls);
+
+    $('funnel').innerHTML='';
+    [['Leads: '+num(r.leads),false],['مؤكّدة: '+num(r.confirmed),false],['مُسلّمة: '+num(r.delivered),false],['مرتجع/غير مُسلّم: '+num(r.returnCount),true]].forEach(([t,bad])=>{
+      const s=document.createElement('span'); if(bad)s.className='bad'; s.textContent=t; $('funnel').appendChild(s);
+    });
+
+    const alert=$('alert'); alert.innerHTML='';
+    let msg='', kind='ok';
+    if(o.weight>=2000){ msg='⚠️ الوزن '+num(o.weight)+' جم يتجاوز 2 كجم — تعرفة COD GROW المذكورة للطرود الأقل من 2 كجم فقط.'; kind='warn'; }
+    else if(r.profit>=0){ msg='✅ رابح: كل قطعة مُسلّمة تحقق '+money(r.per)+' صافياً. سعر التعادل '+money(r.bePrice)+'.'; }
+    else { msg='❌ خاسر: تحتاج سعر بيع ≥ '+money(r.bePrice)+'، أو CPA ≤ '+num(Math.max(0,r.beCpa))+' $'+(delivText==='غير ممكن' ? '، وتحسين التسليم وحده لا يكفي' : '، أو تسليم ≥ '+delivText)+' للتعادل.'; kind='bad'; }
+    alert.className='alert '+kind; alert.textContent=msg;
+
+    const max=Math.max(1,...r.items.map(x=>x[1]));
+    $('breakdown').innerHTML='';
+    r.items.forEach(([label,val])=>{
+      const tr=document.createElement('tr');
+      const t1=document.createElement('td'); t1.textContent=label;
+      const t2=document.createElement('td'); t2.className='n'; t2.textContent=money(val);
+      const t3=document.createElement('td');
+      const wrap=document.createElement('div'); wrap.className='barwrap';
+      const bar=document.createElement('div'); bar.className='bar'; bar.style.width=(val/max*100)+'%';
+      wrap.appendChild(bar); t3.appendChild(wrap);
+      tr.append(t1,t2,t3); $('breakdown').appendChild(tr);
+    });
+    const tr=document.createElement('tr'); tr.className='total';
+    const a=document.createElement('td'); a.textContent='الإجمالي';
+    const b=document.createElement('td'); b.className='n'; b.textContent=money(r.total);
+    const c=document.createElement('td'); c.textContent='';
+    tr.append(a,b,c); $('breakdown').appendChild(tr);
+
+    const prices=[Math.round(o.price),32,39,54].filter((x,i,arr)=>arr.indexOf(x)===i).sort((a,b)=>a-b);
+    $('priceTable').innerHTML='';
+    prices.forEach(p=>{
+      const rr=calc(Object.assign({},o,{price:p}));
+      const row=document.createElement('tr');
+      const t1=document.createElement('td'); t1.textContent=money(p)+(p===Math.round(o.price)?' (الحالي)':'');
+      const t2=document.createElement('td'); t2.className='n'; t2.textContent=money(rr.profit); t2.style.color=rr.profit>=0?'var(--ok)':'var(--danger)';
+      const t3=document.createElement('td'); t3.className='n'; t3.textContent=money(rr.per);
+      row.append(t1,t2,t3); $('priceTable').appendChild(row);
+    });
+
+    const sens=[];
+    [50,60,70,80].forEach(d=>sens.push(['تسليم '+d+'%', calc(Object.assign({},o,{deliv:d})).profit]));
+    [6,9,12].forEach(cpa=>sens.push(['CPA '+cpa+' $', calc(Object.assign({},o,{cpa:cpa})).profit]));
+    sens.push(['مرتجع لكل غير المُسلّم', calc(Object.assign({},o,{returnMode:'all'})).profit]);
+    sens.push(['ضريبة مبيعات 21%', calc(Object.assign({},o,{vat:21})).profit]);
+    $('sensTable').innerHTML='';
+    sens.forEach(([label,val])=>{
+      const row=document.createElement('tr');
+      const t1=document.createElement('td'); t1.textContent=label;
+      const t2=document.createElement('td'); t2.className='n'; t2.textContent=money(val); t2.style.color=val>=0?'var(--ok)':'var(--danger)';
+      row.append(t1,t2); $('sensTable').appendChild(row);
+    });
+    $('copy').dataset.summary = 'حاسبة COD — '+o.market+' | سعر البيع '+money(o.price)+' | CPA '+num(o.cpa)+' $ | تأكيد '+num(o.conf)+'% | تسليم '+num(o.deliv)+'%\n'
+      +'Leads '+num(o.leads)+' → مؤكدة '+num(r.confirmed)+' → مُسلّمة '+num(r.delivered)+'\n'
+      +'الإيراد '+money(r.revenue)+' | التكلفة '+money(r.total)+' | صافي الربح '+money(r.profit)+' | للقطعة '+money(r.per)+' | ROI '+num(r.roi)+'%\n'
+      +'سعر التعادل '+money(r.bePrice)+' | CPA التعادل '+num(Math.max(0,r.beCpa))+' $ | تسليم مطلوب '+delivText+'\n'
+      +'الافتراضات: تكلفة المنتج على '+o.costBasis+' | كول سنتر '+o.ccMode+' | مرتجع '+o.returnMode;
+  }
+
+  FIELDS.forEach(f=>$(f).addEventListener('input',render));
+  ['market','returnMode','costBasis','ccMode'].forEach(f=>$(f).addEventListener('change',()=>{
+    if(f==='market'){
+      const m=MARKETS[$(f).value];
+      $('shipping').value=m.shipping; $('retFee').value=m.retFee;
+    }
+    render();
+  }));
+  $('reset').addEventListener('click',()=>{
+    Object.keys(DEFAULTS).forEach(k=>{ const el=$(k); if(el) el.value=DEFAULTS[k]; });
+    render();
+  });
+  document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{
+    const p=btn.dataset.preset;
+    if(p==='base'){ $('price').value=32; $('cpa').value=9; $('conf').value=60; $('deliv').value=60; }
+    if(p==='target'){ $('price').value=54; }
+    if(p==='cpa6'){ $('cpa').value=6; }
+    if(p==='d80'){ $('deliv').value=80; }
+    render();
+  }));
+  $('copy').addEventListener('click',async()=>{
+    const text=$('copy').dataset.summary||'';
+    try{ await navigator.clipboard.writeText(text); $('copy').textContent='تم النسخ ✓'; setTimeout(()=>$('copy').textContent='نسخ ملخص النتيجة',1500); }
+    catch(e){ window.prompt('انسخ الملخص:',text); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>

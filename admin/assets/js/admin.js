@@ -1337,6 +1337,24 @@
   };
 
   /* ==================================================== */
+  /*  VIEW: ACCOUNTS (الحسابات — حاسبة ربح COD)           */
+  /* ==================================================== */
+  views.accounts = function () {
+    const el = $('#content');
+    el.innerHTML = `
+      <div class="page-head">
+        <div>
+          <h1>الحسابات</h1>
+          <p>حاسبة ربح COD — محاكاة الأسعار والتكاليف والربحية</p>
+        </div>
+      </div>
+      <div class="card calc-card">
+        <iframe class="calc-frame" src="accounts.html?v=1" title="حاسبة ربح COD"></iframe>
+      </div>
+    `;
+  };
+
+  /* ==================================================== */
   /*  VIEW: EXCEL (اكسل)                                   */
   /* ==================================================== */
   views.excel = function () {
@@ -1740,7 +1758,8 @@
     const nav = $('#content');
     document.body.classList.toggle('excel-mode', view === 'excel');
     document.body.classList.toggle('fullscreen-orders', view === 'orders');
-    nav.classList.toggle('content-full', view === 'excel' || view === 'orders');
+    document.body.classList.toggle('accounts-mode', view === 'accounts');
+    nav.classList.toggle('content-full', view === 'excel' || view === 'orders' || view === 'accounts');
     if (views[view]) views[view]();
     else views.overview();
   }
