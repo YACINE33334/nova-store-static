@@ -203,6 +203,19 @@
     } catch (e) { return 'sid-' + Date.now(); }
   }
 
+  /* Pack configurado en la ficha del producto: piezas fijas y precio propio. */
+  function packSettings(product, fallbackQty) {
+    const p = product || {};
+    const chosen = Number(p.orderPieces);
+    const qty = Number.isFinite(chosen) && chosen >= 1
+      ? Math.max(1, Math.min(99, Math.round(chosen)))
+      : Math.max(1, Math.min(99, Number(fallbackQty) || 1));
+    const unitFromProduct = Number(p.price) || 0;
+    const custom = (p.orderPrice === '' || p.orderPrice == null) ? NaN : Number(p.orderPrice);
+    const total = Number.isFinite(custom) && custom >= 0 ? custom : unitFromProduct * qty;
+    return { qty, total, price: qty > 0 ? total / qty : unitFromProduct };
+  }
+
   function collectLead(product, qty) {
     const v = (id) => {
       const el = $(id);
@@ -259,7 +272,8 @@
   }
 
   function renderCheckout(product, qty) {
-    const total = Number(product.price) * qty;
+    const pack = packSettings(product, qty);
+    const total = pack.total;
     const pimg = Array.isArray(product.images) && product.images[0] ? product.images[0] : null;
     const thumb = pimg
       ? `<img class="ck-img" src="${pimg}" alt="${product.name}">`
@@ -281,7 +295,7 @@
           <div class="ck-thumb" style="background:${product.hue || '#f5f5f5'}">${thumb}</div>
           <div class="ck-prod-info">
             <div class="ck-prod-name">${product.name}</div>
-            <div class="ck-prod-cat">${product.cat || t('ck_prod_label')} &middot; x${qty}</div>
+            <div class="ck-prod-cat">${product.cat || t('ck_prod_label')} &middot; x${pack.qty}</div>
           </div>
           <div class="ck-prod-price">${currency(total)}</div>
         </div>
@@ -342,7 +356,7 @@
     const submitBtn = $('#order-submit');
 
     bindZipCity();
-    bindLeadCapture(product, qty);
+    bindLeadCapture(product, pack.qty);
 
     if (window.NovaPixel) {
       window.NovaPixel.setCustomer({
@@ -358,7 +372,7 @@
         content_type: 'product',
         value: total,
         currency: window.NovaPixel.currency,
-        num_items: qty,
+        num_items: pack.qty,
       });
     }
 
@@ -383,7 +397,10 @@
       const body = {
         sid: leadSid(),
         productId: product.id,
-        name, phone, qty,
+        name, phone,
+        qty: pack.qty,
+        priceOverride: pack.price,
+        totalOverride: pack.total,
         location: buildLocationString(),
         address: street,
         zip: zip,

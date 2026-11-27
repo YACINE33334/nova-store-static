@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تعديل صفحة الهبوط — NOVA</title>
+  <title>????? ???? ?????? � NOVA</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23008060'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='800' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -14,17 +14,17 @@
   <div class="ed-topbar">
     <a href="index.html#products" class="ed-back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-      العودة للمنتجات
+      ?????? ????????
     </a>
-    <div class="ed-title" id="ed-title">تعديل صفحة الهبوط</div>
+    <div class="ed-title" id="ed-title">????? ???? ??????</div>
     <div class="ed-topbar-actions">
-      <button class="btn btn-secondary btn-sm" id="ed-reset">استعادة الافتراضي</button>
+      <button class="btn btn-secondary btn-sm" id="ed-reset">??????? ?????????</button>
       <a class="btn btn-secondary btn-sm" id="ed-preview" href="#" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
-        معاينة الصفحة</a>
+        ?????? ??????</a>
       <button class="btn btn-primary btn-sm" id="ed-save">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
-        حفظ</button>
+        ???</button>
     </div>
   </div>
 
@@ -32,13 +32,13 @@
     <div class="ed-form card" id="ed-form">
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>الحالة</h3>
-          <p>نشر صفحة الهبوط أو إخفاؤها من المتجر</p>
+          <h3>??????</h3>
+          <p>??? ???? ?????? ?? ??????? ?? ??????</p>
         </div>
         <div class="toggle-row">
           <div>
-            <div class="tt">معروض على المتجر</div>
-            <div class="ts">عند التفعيل تظهر هذه الصفحة للزوار بمعرّفها</div>
+            <div class="tt">????? ??? ??????</div>
+            <div class="ts">??? ??????? ???? ??? ?????? ?????? ????????</div>
           </div>
           <label class="switch"><input type="checkbox" id="f-active" checked><span class="slider"></span></label>
         </div>
@@ -46,51 +46,51 @@
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>المعلومات الأساسية</h3>
-          <p>الاسم، السعر، المخزون وشارة المنتج</p>
+          <h3>????????? ????????</h3>
+          <p>?????? ?????? ??????? ????? ??????</p>
         </div>
         <div class="ed-grid-2">
           <div class="form-group">
-            <label class="form-label">اسم المنتج</label>
+            <label class="form-label">??? ??????</label>
             <input class="input" id="f-name" />
           </div>
           <div class="form-group">
-            <label class="form-label">التصنيف</label>
+            <label class="form-label">???????</label>
             <input class="input" id="f-cat" list="pf-cats" placeholder="Apparel, Home ..." />
             <datalist id="pf-cats"><option>Apparel</option><option>Outerwear</option><option>Home</option><option>Furniture</option><option>Accessories</option><option>Lighting</option><option>Kitchen</option><option>Tools</option></datalist>
           </div>
         </div>
         <div class="ed-grid-2">
           <div class="form-group">
-            <label class="form-label">العنوان الرئيسي لصفحة الهبوط</label>
-            <input class="input" id="f-headline" placeholder="مثال: قميص الكتان المثالي" />
+            <label class="form-label">??????? ??????? ????? ??????</label>
+            <input class="input" id="f-headline" placeholder="????: ???? ?????? ???????" />
           </div>
         </div>
         <div class="ed-grid-3">
           <div class="form-group">
-            <label class="form-label">السعر ($)</label>
+            <label class="form-label">????? ($)</label>
             <input class="input" id="f-price" type="number" min="0" step="0.01" />
           </div>
           <div class="form-group">
-            <label class="form-label">السعر القديم ($ — اختياري)</label>
-            <input class="input" id="f-old" type="number" min="0" step="0.01" placeholder="بلا تخفيض" />
+            <label class="form-label">????? ?????? ($ � ???????)</label>
+            <input class="input" id="f-old" type="number" min="0" step="0.01" placeholder="??? ?????" />
           </div>
           <div class="form-group">
-            <label class="form-label">الشارة</label>
+            <label class="form-label">??????</label>
             <select class="select-full" id="f-tag">
-              <option value="">بلا</option>
-              <option value="new">جديد</option>
-              <option value="sale">تخفيض</option>
+              <option value="">???</option>
+              <option value="new">????</option>
+              <option value="sale">?????</option>
             </select>
           </div>
         </div>
         <div class="ed-grid-2">
           <div class="form-group">
-            <label class="form-label">المخزون</label>
+            <label class="form-label">???????</label>
             <input class="input" id="f-stock" type="number" min="0" />
           </div>
           <div class="form-group">
-            <label class="form-label">لون الخلفية</label>
+            <label class="form-label">??? ???????</label>
             <input class="input" id="f-hue" type="color" style="height:44px;padding:4px" />
           </div>
         </div>
@@ -98,20 +98,20 @@
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>الصور</h3>
-          <p>روابط صور المنتج التي تظهر في المعرض (يمكن إضافة عدة صور — الأولى هي الرئيسية)</p>
+          <h3>?????</h3>
+          <p>????? ??? ?????? ???? ???? ?? ?????? (???? ????? ??? ??? � ?????? ?? ????????)</p>
         </div>
         <div id="ed-images"><!-- dynamic image rows --></div>
         <button class="btn btn-secondary btn-sm" id="ed-img-add" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          إضافة صورة
+          ????? ????
         </button>
       </div>
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>معلومات المنتج (SKU / Material / Origen)</h3>
-          <p>تظهر في شريط المعلومات أسفل وصف المنتج في الصفحة</p>
+          <h3>??????? ?????? (SKU / Material / Origen)</h3>
+          <p>???? ?? ???? ????????? ???? ??? ?????? ?? ??????</p>
         </div>
         <div class="ed-grid-3">
           <div class="form-group"><label class="form-label">SKU</label><input class="input" id="f-sku" placeholder="NV-0010" /></div>
@@ -119,26 +119,38 @@
           <div class="form-group"><label class="form-label">Origen</label><input class="input" id="f-origen" placeholder="Hecho en la UE" /></div>
         </div>
         <div class="form-group" style="margin-top:12px">
-          <label class="form-label">ملاحظة الطلب في جوجل شيت (Note)</label>
-          <p class="set-desc" style="color:#666;font-size:13px;margin:0 0 8px">القيمة اللي كتكتب فعمود Note فكل طلب جديد ديال هاد المنتج. خلّيها فارغة باش ما يكتب شي.</p>
-          <input class="input" id="f-sheet-note" placeholder="مثلاً: طلب هاتفي" />
+          <label class="form-label">?????? ????? ?? ???? ??? (Note)</label>
+          <p class="set-desc" style="color:#666;font-size:13px;margin:0 0 8px">?????? ???? ????? ????? Note ??? ??? ???? ???? ??? ??????. ?????? ????? ??? ?? ???? ??.</p>
+          <input class="input" id="f-sheet-note" placeholder="?????: ??? ?????" />
+        </div>
+        <div class="ed-grid-3" style="margin-top:12px">
+          <div class="form-group">
+            <label class="form-label">??? ????? ??? ????? (Quantity)</label>
+            <p class="set-desc" style="color:#666;font-size:13px;margin:0 0 8px">????? 3 ???? ?? ??? ????? 3 ???? ????? ????? Quantity. ?????? ????? ??? ?????? ?????? ???????.</p>
+            <input class="input" id="f-order-pieces" type="number" min="1" max="99" placeholder="????: 3" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">??? ???? ??????? (Price / Total)</label>
+            <p class="set-desc" style="color:#666;font-size:13px;margin:0 0 8px">????? ???? ?????? ?????? ?????? Price ??????. ?????? ????? ??? ?????? ??? ?????? � ??????.</p>
+            <input class="input" id="f-order-price" type="number" min="0" step="0.01" placeholder="????: 52" />
+          </div>
         </div>
       </div>
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>الإثبات الاجتماعي</h3>
-          <p>التقييم وعدد المراجعات والمبيعات وسطر «أدنى سعر في آخر 30 يوماً»</p>
+          <h3>??????? ?????????</h3>
+          <p>??????? ???? ????????? ????????? ???? �???? ??? ?? ??? 30 ?????�</p>
         </div>
         <div class="ed-grid-3">
-          <div class="form-group"><label class="form-label">التقييم (0-5)</label><input class="input" id="f-rating" type="number" min="0" max="5" step="0.1" /></div>
-          <div class="form-group"><label class="form-label">عدد المراجعات</label><input class="input" id="f-reviews-count" type="number" min="0" /></div>
-          <div class="form-group"><label class="form-label">المبيعات (vendidos)</label><input class="input" id="f-sold" type="number" min="0" /></div>
+          <div class="form-group"><label class="form-label">??????? (0-5)</label><input class="input" id="f-rating" type="number" min="0" max="5" step="0.1" /></div>
+          <div class="form-group"><label class="form-label">??? ?????????</label><input class="input" id="f-reviews-count" type="number" min="0" /></div>
+          <div class="form-group"><label class="form-label">???????? (vendidos)</label><input class="input" id="f-sold" type="number" min="0" /></div>
         </div>
         <div class="toggle-row">
           <div>
-            <div class="tt">أدنى سعر في آخر 30 يوماً</div>
-            <div class="ts">إظهار سطر «Precio más bajo en los últimos 30 días»</div>
+            <div class="tt">???? ??? ?? ??? 30 ?????</div>
+            <div class="ts">????? ??? �Precio m�s bajo en los �ltimos 30 d�as�</div>
           </div>
           <label class="switch"><input type="checkbox" id="f-low30" checked><span class="slider"></span></label>
         </div>
@@ -146,27 +158,27 @@
 
       <div class="ed-section" id="ed-reviews-sec">
         <div class="ed-section-head">
-          <h3>المراجعات</h3>
-          <p>مراجعات خاصة بهذا المنتج تظهر في قسم المراجعات. عند إضافة أي مراجعة، تُستخدم هذه المراجعات بدلاً من القائمة العامة.</p>
+          <h3>?????????</h3>
+          <p>??????? ???? ???? ?????? ???? ?? ??? ?????????. ??? ????? ?? ??????? ??????? ??? ????????? ????? ?? ??????? ??????.</p>
         </div>
         <div id="ed-reviews"><!-- dynamic review blocks --></div>
         <button class="btn btn-secondary btn-sm" id="ed-review-add" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          إضافة مراجعة
+          ????? ??????
         </button>
       </div>
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>محتوى الصفحة</h3>
-          <p>النص الترويجي ووصف المنتج</p>
+          <h3>????? ??????</h3>
+          <p>???? ???????? ???? ??????</p>
         </div>
         <div class="form-group">
-          <label class="form-label">السطر الترويجي (يظهر تحت العنوان)</label>
-          <input class="input" id="f-lead" placeholder="جملة قصيرة تسوّق المنتج" />
+          <label class="form-label">????? ???????? (???? ??? ???????)</label>
+          <input class="input" id="f-lead" placeholder="???? ????? ????? ??????" />
         </div>
 <div class="form-group">
-          <label class="form-label">وصف المنتج (محرر هجين — نص + HTML + صور)</label>
+          <label class="form-label">??? ?????? (???? ???? � ?? + HTML + ???)</label>
           <div class="ed-rt">
             <div class="ed-rt-modes">
               <button type="button" class="ed-rt-mode-btn active" data-mode="normal">Normal Editor</button>
@@ -175,90 +187,90 @@
 
             <div class="ed-rt-panel" id="ed-rt-panel-normal">
               <div class="ed-rt-toolbar">
-                <button type="button" class="ed-rt-btn" data-cmd="bold" title="عريض"><b>B</b></button>
-                <button type="button" class="ed-rt-btn" data-cmd="italic" title="مائل"><i>I</i></button>
-                <button type="button" class="ed-rt-btn" data-cmd="underline" title="تسطير"><u>U</u></button>
-                <button type="button" class="ed-rt-btn" data-cmd="strikeThrough" title="شطب"><s>S</s></button>
+                <button type="button" class="ed-rt-btn" data-cmd="bold" title="????"><b>B</b></button>
+                <button type="button" class="ed-rt-btn" data-cmd="italic" title="????"><i>I</i></button>
+                <button type="button" class="ed-rt-btn" data-cmd="underline" title="?????"><u>U</u></button>
+                <button type="button" class="ed-rt-btn" data-cmd="strikeThrough" title="???"><s>S</s></button>
                 <span class="ed-rt-sep"></span>
-                <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="h3" title="عنوان"><span class="ed-rt-h-mark">H</span></button>
-                <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="blockquote" title="اقتباس">
+                <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="h3" title="?????"><span class="ed-rt-h-mark">H</span></button>
+                <button type="button" class="ed-rt-btn" data-cmd="formatBlock" data-val="blockquote" title="??????">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6H6a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2v1a3 3 0 0 1-3 3H5"/><path d="M21 6h-3a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2v1a3 3 0 0 1-3 3"/></svg>
                 </button>
-                <button type="button" class="ed-rt-btn" data-cmd="insertUnorderedList" title="قائمة نقطية">
+                <button type="button" class="ed-rt-btn" data-cmd="insertUnorderedList" title="????? ?????">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
                 </button>
-                <button type="button" class="ed-rt-btn" data-cmd="insertOrderedList" title="قائمة مرقمة">
+                <button type="button" class="ed-rt-btn" data-cmd="insertOrderedList" title="????? ?????">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h9M12 12h9M12 18h9"/><text x="2" y="9" font-size="7" fill="currentColor" stroke="none" font-family="inherit">1</text><text x="2" y="15" font-size="7" fill="currentColor" stroke="none" font-family="inherit">2</text><text x="2" y="21" font-size="7" fill="currentColor" stroke="none" font-family="inherit">3</text></svg>
                 </button>
                 <span class="ed-rt-sep"></span>
-                <button type="button" class="ed-rt-btn" data-cmd="createLink" title="إدراج رابط">
+                <button type="button" class="ed-rt-btn" data-cmd="createLink" title="????? ????">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L12.1 5.43"/><path d="M14 10a5 5 0 0 0-7.07 0L4.1 12.83a5 5 0 0 0 7.07 7.07l1.73-1.73"/></svg>
                 </button>
-                <button type="button" class="ed-rt-btn" data-cmd="unlink" title="إزالة الرابط">
+                <button type="button" class="ed-rt-btn" data-cmd="unlink" title="????? ??????">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.73 1.73"/><path d="M14 10a5 5 0 0 0-7.07 0L4.1 12.83a5 5 0 0 0 7.07 7.07l1.73-1.73"/><path d="M4 4l16 16"/></svg>
                 </button>
-                <label class="ed-rt-btn ed-rt-upload" id="ed-rt-upload-image-normal" data-cmd="uploadImage" title="إضافة صورة من الجهاز">
+                <label class="ed-rt-btn ed-rt-upload" id="ed-rt-upload-image-normal" data-cmd="uploadImage" title="????? ???? ?? ??????">
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 19 5-5 3 3 3-3 5 5"/></svg>
                 </label>
-                <label class="ed-rt-btn ed-rt-upload" id="ed-rt-upload-video-normal" data-cmd="uploadVideo" title="إضافة فيديو من الجهاز (MP4 / WebM)">
+                <label class="ed-rt-btn ed-rt-upload" id="ed-rt-upload-video-normal" data-cmd="uploadVideo" title="????? ????? ?? ?????? (MP4 / WebM)">
                   <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" hidden />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="13" height="12" rx="2.5"/><path d="m15 10 5.5-3v10L15 14"/></svg>
                 </label>
-                <button type="button" class="ed-rt-btn" id="ed-rt-video-del" title="حذف الفيديو المحدد من الوصف ومن التخزين" disabled>
+                <button type="button" class="ed-rt-btn" id="ed-rt-video-del" title="??? ??????? ?????? ?? ????? ??? ???????" disabled>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
                 </button>
               </div>
               <div class="ed-rt-area" id="f-desc-rt" contenteditable="true" dir="ltr"
-                data-placeholder="اكتب وصف المنتج هنا... (يدعم العريض، القوائم، الروابط والصور والفيديوهات)"></div>
+                data-placeholder="???? ??? ?????? ???... (???? ??????? ???????? ??????? ?????? ???????????)"></div>
             </div>
 
             <div class="ed-rt-panel" id="ed-rt-panel-html" hidden>
               <div class="ed-rt-toolbar">
                 <span class="ed-rt-html-tag">&lt;HTML&gt;</span>
                 <span class="ed-rt-sep"></span>
-                <label class="ed-rt-btn ed-rt-upload ed-rt-upload-html" id="ed-rt-upload-image-html" title="إضافة صورة من الجهاز (تُرفع إلى Supabase Storage)">
+                <label class="ed-rt-btn ed-rt-upload ed-rt-upload-html" id="ed-rt-upload-image-html" title="????? ???? ?? ?????? (????? ??? Supabase Storage)">
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" id="f-desc-html-upload" hidden />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 19 5-5 3 3 3-3 5 5"/></svg>
                 </label>
-                <label class="ed-rt-btn ed-rt-upload ed-rt-upload-html" id="ed-rt-upload-video-html" title="إضافة فيديو من الجهاز (يُنشئ وسم <video> تلقائيًا)">
+                <label class="ed-rt-btn ed-rt-upload ed-rt-upload-html" id="ed-rt-upload-video-html" title="????? ????? ?? ?????? (????? ??? <video> ????????)">
                   <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" id="f-desc-html-upload-video" hidden />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="13" height="12" rx="2.5"/><path d="m15 10 5.5-3v10L15 14"/></svg>
                 </label>
               </div>
               <textarea class="ed-rt-code" id="f-desc-html" dir="ltr" spellcheck="false"
-                placeholder="<p>اكتب HTML هنا...</p>"></textarea>
+                placeholder="<p>???? HTML ???...</p>"></textarea>
             </div>
 
-            <div class="ed-rt-hint">التبديل بين Normal وHTML يحافظ على المحتوى. أدرج الصور من أي وضع — تُرفع إلى Supabase Storage ويُحفظ رابطها.</div>
+            <div class="ed-rt-hint">??????? ??? Normal ?HTML ????? ??? ???????. ???? ????? ?? ?? ??? � ????? ??? Supabase Storage ?????? ??????.</div>
           </div>
         </div>
       </div>
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>المميزات</h3>
-          <p>نقاط تظهر في قسم «Considered details»</p>
+          <h3>????????</h3>
+          <p>???? ???? ?? ??? �Considered details�</p>
         </div>
         <div id="ed-feats"><!-- dynamic rows --></div>
         <button class="btn btn-secondary btn-sm" id="ed-feat-add" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          إضافة ميزة
+          ????? ????
         </button>
       </div>
 
       <div class="ed-section">
         <div class="ed-section-head">
-          <h3>دعوة لاتخاذ إجراء</h3>
-          <p>نص زر الإضافة (يظهر للزائر)</p>
+          <h3>???? ?????? ?????</h3>
+          <p>?? ?? ??????? (???? ??????)</p>
         </div>
         <div class="ed-grid-2">
           <div class="form-group">
-            <label class="form-label">نص الزر</label>
+            <label class="form-label">?? ????</label>
             <input class="input" id="f-cta" value="Buy Now" />
           </div>
           <div class="form-group">
-            <label class="form-label">رابط الزر</label>
+            <label class="form-label">???? ????</label>
             <input class="input" id="f-cta-link" value="#add" placeholder="#add" />
           </div>
         </div>
@@ -266,32 +278,32 @@
 
       <div class="ed-section" id="ed-i18n-sec">
         <div class="ed-section-head">
-          <h3>ترجمة نموذج الطلب</h3>
-          <p>نسخة مطابقة لنموذج ملء المعلومات الذي يراه الزبون (الإسبانية هي الافتراضية). اكتب الترجمة مكان كل نص — أي نص تتركه كما هو يبقى بالإسبانية.</p>
+          <h3>????? ????? ?????</h3>
+          <p>???? ?????? ?????? ??? ????????? ???? ???? ?????? (????????? ?? ??????????). ???? ??????? ???? ?? ?? � ?? ?? ????? ??? ?? ???? ??????????.</p>
         </div>
         <div id="ed-i18n"><!-- dynamic translation rows --></div>
 <div class="ed-i18n-actions">
           <a class="btn btn-secondary btn-sm" id="ed-i18n-preview" href="../order.html" target="_blank" rel="noopener">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
-            معاينة صفحة الطلب
+            ?????? ???? ?????
           </a>
-          <button class="btn btn-secondary btn-sm" id="ed-i18n-clear" type="button">إفراغ الحقول المترجمة (العودة للإسبانية)</button>
+          <button class="btn btn-secondary btn-sm" id="ed-i18n-clear" type="button">????? ?????? ???????? (?????? ?????????)</button>
           <button class="btn btn-primary btn-sm" id="ed-i18n-save" type="button">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
-            حفظ الترجمات <span class="ed-i18n-badge" id="ed-i18n-badge" hidden>0</span>
+            ??? ???????? <span class="ed-i18n-badge" id="ed-i18n-badge" hidden>0</span>
           </button>
-          <p class="ed-i18n-note">زر «حفظ» الأخضر أعلى الصفحة يحفظ الآن الترجمات أيضاً مع صفحة الهبوط.</p>
+          <p class="ed-i18n-note">?? �???� ?????? ???? ?????? ???? ???? ???????? ????? ?? ???? ??????.</p>
         </div>
       </div>
     </div>
 
     <!-- Live preview -->
     <aside class="ed-preview-wrap">
-      <div class="ed-preview-head">معاينة مباشرة</div>
+      <div class="ed-preview-head">?????? ??????</div>
       <div class="ed-preview" id="ed-preview-frame">
         <div class="edp-hero">
-          <span class="edp-eyebrow" id="pv-cat">—</span>
-          <h1 id="pv-headline">—</h1>
+          <span class="edp-eyebrow" id="pv-cat">�</span>
+          <h1 id="pv-headline">�</h1>
           <div class="edp-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
           <div class="edp-revcount" id="pv-revcount"></div>
           <div class="edp-price" id="pv-price"></div>
@@ -302,16 +314,16 @@
           <button class="btn btn-primary" id="pv-cta">Buy Now</button>
         </div>
       </div>
-      <p class="ed-hint">الضغط على «حفظ» يحدّث صفحة الهبوط مباشرة على <code>/product.html?id=<span id="ed-code-id">..</span></code></p>
+      <p class="ed-hint">????? ??? �???� ????? ???? ?????? ?????? ??? <code>/product.html?id=<span id="ed-code-id">..</span></code></p>
     </aside>
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../assets/js/nova-supabase.js?v=2"></script>
-  <script src="../assets/js/api.js?v=4"></script>
+  <script src="../assets/js/api.js?v=6"></script>
 <script src="../assets/js/currency.js?v=1"></script>
 <script src="../assets/js/store.js?v=10"></script>
 <script src="../assets/js/checkout-i18n.js?v=2"></script>
-<script src="assets/js/editor.js?v=27"></script>
+<script src="assets/js/editor.js?v=28"></script>
 </body>
 </html>
