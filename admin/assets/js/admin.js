@@ -1616,6 +1616,7 @@
             <button class="active" data-panel="general">عام</button>
             <button data-panel="storefront">الواجهة</button>
             <button data-panel="pixel">البكسل (Pixel)</button>
+            <button data-panel="sheet">تسجيل الطلبات</button>
           </div>
         </div>
 
@@ -1664,6 +1665,23 @@
         <button class="btn btn-secondary btn-sm" id="pixel-add" type="button">+ إضافة بكسل</button>
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات البكسل</button></div>
       `,
+      sheet: `
+        <h3 class="card-title" style="margin-bottom:18px">تسجيل الطلبات في Google Sheets</h3>
+        <p class="set-desc" style="color:#666;font-size:13px;margin-bottom:16px">في وضع الاختبار لا يُرسل أي طلب إلى Google Sheets — استخدمه أثناء تجربة صفحة الطلب. عند بدء البيع فعّل «بيع / يرسل»: سيُضاف صف جديد لكل طلب بالترتيب المطلوب.</p>
+        <div class="form-group">
+          <label class="form-label">الوضع</label>
+          <select class="select-full" id="set-sheet-mode">
+            <option value="test">اختبار / ما يرسلش</option>
+            <option value="live">بيع / يرسل لجوجل شيت</option>
+          </select>
+        </div>
+        <p class="set-desc" style="color:#666;font-size:13px;margin:-6px 0 16px">SKU المرسول للشيت هو حقل SKU الخاص بالمنتج من صفحة المنتج. خلّي الحقل فارغ باش ما تكتب شي.</p>
+        <div class="form-group">
+          <label class="form-label">القيمة في عمود Prepaid (YES if prepaid)</label>
+          <input class="input" id="set-sheet-prepaid" dir="ltr" placeholder="YES" />
+        </div>
+        <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات التسجيل</button></div>
+      `,
     };
 
     const pixelRowHTML = (p = {}) => `
@@ -1705,6 +1723,8 @@
         if ($('#set-email')) settings.email = $('#set-email').value.trim();
         if ($('#set-whatsapp')) settings.whatsapp = $('#set-whatsapp').value.trim();
         if ($('#set-currency')) settings.currency = $('#set-currency').value;
+        if ($('#set-sheet-mode')) settings.sheetLogMode = $('#set-sheet-mode').value;
+        if ($('#set-sheet-prepaid')) settings.sheetPrepaid = $('#set-sheet-prepaid').value.trim();
         if ($('#pixel-rows')) settings.fbPixels = collectPixelRows();
         fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
           .then(() => toast('تم حفظ الإعدادات', 'success'))
@@ -1715,13 +1735,15 @@
         $('#pixel-rows').insertAdjacentHTML('beforeend', pixelRowHTML());
         bindPixelRows();
       });
-      if (name === 'general' || name === 'pixel') {
+      if (name === 'general' || name === 'pixel' || name === 'sheet') {
         fetch('/api/settings').then(r => r.json()).then(s => {
           settings = s || {};
           if ($('#set-store-name')) $('#set-store-name').value = settings.storeName || '';
           if ($('#set-email')) $('#set-email').value = settings.email || '';
           if ($('#set-whatsapp')) $('#set-whatsapp').value = settings.whatsapp || '';
           if ($('#set-currency')) $('#set-currency').value = settings.currency || 'USD';
+          if ($('#set-sheet-mode')) $('#set-sheet-mode').value = settings.sheetLogMode === 'live' ? 'live' : 'test';
+          if ($('#set-sheet-prepaid')) $('#set-sheet-prepaid').value = settings.sheetPrepaid || '';
           if (name === 'pixel') {
             let rows = settings.fbPixels;
             if (!Array.isArray(rows) && (settings.fbPixel || settings.fbToken)) {
