@@ -44,7 +44,7 @@
         total: Number(order.total) || 0,
         utmSource: utm,
         prepaid: (cfg.data.sheetPrepaid != null ? String(cfg.data.sheetPrepaid) : '') || order.prepaid || '',
-        note: order.note || '',
+        note: String((product && (product.sheetNote || product.note)) || order.note || ''),
       };
       await fetch(SHEET_WEBHOOK, {
         method: 'POST',
