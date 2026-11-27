@@ -14,6 +14,48 @@
 
   const CURRENCY = '$';
 
+  /* Google Sheet logger (Apps Script web app). Nada se envía salvo que el
+     administrador active el modo "venta" en Ajustes → Registro de pedidos. */
+  const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyqGbhfGfCHLMSyM_9TWL0yb2WV83ogIaFblm5gl8gnN1-cEjKls7YKQpCZ_5-NSFUs/exec';
+
+  async function logOrderToSheet(order, product) {
+    try {
+      if (!SHEET_WEBHOOK || SHEET_WEBHOOK.indexOf('__DEPLOYMENT_ID__') >= 0) return;
+      const cfg = await fetchJson('/api/settings');
+      if (!cfg.ok || !cfg.data || cfg.data.sheetLogMode !== 'live') return;
+      let utm = '';
+      try {
+        utm = new URLSearchParams(location.search).get('utm_source')
+          || sessionStorage.getItem('nova_utm_source') || '';
+      } catch (e) { /* best effort */ }
+      const body = {
+        key: 'nova_a32f803b06847dd2ff8f9713',
+        orderId: order.id,
+        sid: order.sid || '',
+        customer: order.name || '',
+        phone: order.phone || '',
+        address: [order.address, order.piso].filter(Boolean).join(' ').trim(),
+        city: order.city || '',
+        zip: order.zip || '',
+        province: order.province || '',
+        country: 'Spain',
+        sku: String((product && product.sku) || (order && order.sku) || (product && product.id) || order.productId || ''),
+        qty: Number(order.qty) || 1,
+        total: Number(order.total) || 0,
+        utmSource: utm,
+        prepaid: (cfg.data.sheetPrepaid != null ? String(cfg.data.sheetPrepaid) : '') || order.prepaid || '',
+        note: order.note || '',
+      };
+      await fetch(SHEET_WEBHOOK, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(body),
+        keepalive: true,
+      });
+    } catch (e) { /* never break the checkout */ }
+  }
+
   /* ---------------- traducciones del formulario ---------------- */
   const DEFAULTS = (window.NOVA_I18N_DEFAULTS) || {};
   let OVERRIDES = {};
@@ -356,6 +398,7 @@
 
       if (ok && data && data.id) {
         showSuccess(data, product);
+        logOrderToSheet(data, product);
       } else {
         submitBtn.disabled = false;
         submitBtn.textContent = t('submit');
