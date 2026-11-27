@@ -1675,10 +1675,11 @@
             <option value="live">بيع / يرسل لجوجل شيت</option>
           </select>
         </div>
-        <p class="set-desc" style="color:#666;font-size:13px;margin:-6px 0 16px">SKU المرسول للشيت هو حقل SKU الخاص بالمنتج من صفحة المنتج. خلّي الحقل فارغ باش ما تكتب شي.</p>
+        <p class="set-desc" style="color:#666;font-size:13px;margin:-6px 0 16px">SKU المرسول للشيت هو حقل SKU الخاص بالمنتج. ملاحظة العمود Note كتكتبها من صفحة إعدادات المنتج.</p>
         <div class="form-group">
           <label class="form-label">القيمة في عمود Prepaid (YES if prepaid)</label>
-          <input class="input" id="set-sheet-prepaid" dir="ltr" placeholder="YES" />
+          <p class="set-desc" style="color:#666;font-size:13px;margin:0 0 8px">خلّيها فارغة إذا الدفع عند الاستلام (Contra reembolso). كتب YES غير إذا الزبون خلّص مسبقاً.</p>
+          <input class="input" id="set-sheet-prepaid" dir="ltr" placeholder="" />
         </div>
         <div class="save-bar"><button class="btn btn-primary set-save">حفظ إعدادات التسجيل</button></div>
       `,

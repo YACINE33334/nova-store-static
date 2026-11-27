@@ -801,7 +801,7 @@
 
     const data = {
       name: '', cat: '', headline: '', lead: '', desc: '', price: 0, old: null,
-      tag: null, stock: 0, hue: '#e7ecf3', sku: '', material: '', origen: '',
+      tag: null, stock: 0, hue: '#e7ecf3', sku: '', material: '', origen: '', sheetNote: '',
       rating: 4.5, reviews: 0, sold: null, low30: true, images: [],
       reviewsArray: [], features: [], cta: 'Buy Now', ctaLink: '#add', active: true,
     };
@@ -949,6 +949,7 @@
         sku: $('#f-sku').value.trim(),
         material: $('#f-material').value.trim(),
         origen: $('#f-origen').value.trim(),
+        sheetNote: $('#f-sheet-note').value.trim(),
         rating: $('#f-rating').value ? Number($('#f-rating').value) : 4.5,
         reviews: $('#f-reviews-count').value ? Number($('#f-reviews-count').value) : 0,
         sold: $('#f-sold').value ? Number($('#f-sold').value) : null,
@@ -1057,6 +1058,7 @@
       $('#f-sku').value = data.sku || '';
       $('#f-material').value = data.material || '';
       $('#f-origen').value = data.origen || '';
+      $('#f-sheet-note').value = data.sheetNote || '';
       $('#f-rating').value = data.rating == null ? '' : data.rating;
       $('#f-reviews-count').value = data.reviews == null ? '' : data.reviews;
       $('#f-sold').value = data.sold == null ? '' : data.sold;
@@ -1210,6 +1212,7 @@
           sku: $('#f-sku').value.trim(),
           material: $('#f-material').value.trim(),
           origen: $('#f-origen').value.trim(),
+          sheetNote: $('#f-sheet-note').value.trim(),
           rating: $('#f-rating').value ? Number($('#f-rating').value) : 4.5,
           reviews: $('#f-reviews-count').value ? Number($('#f-reviews-count').value) : 0,
           sold: $('#f-sold').value ? Number($('#f-sold').value) : null,
