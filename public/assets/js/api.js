@@ -263,6 +263,10 @@
       var sid = String(o.sid || '').trim();
       var productId = Number(o.productId);
       var qty = Math.max(1, Math.min(99, Number(o.qty) || 1));
+      var totalOverride = Number(o.totalOverride);
+      var hasTotalOverride = Number.isFinite(totalOverride) && totalOverride >= 0;
+      var priceOverride = Number(o.priceOverride);
+      var hasPriceOverride = Number.isFinite(priceOverride) && priceOverride >= 0;
       var name = String(o.name || '').trim();
       var phone = String(o.phone || '').trim();
       var addr = String(o.location || '').trim();
@@ -297,7 +301,8 @@
       }
 
       return state.task.then(function () {
-        var total = (state.price != null) ? state.price * qty : 0;
+        if (hasPriceOverride) state.price = priceOverride;
+        var total = hasTotalOverride ? totalOverride : ((state.price != null) ? state.price * qty : 0);
         var payload = {
           productId: productId || null,
           productName: state.productName || null,

@@ -801,7 +801,7 @@
 
     const data = {
       name: '', cat: '', headline: '', lead: '', desc: '', price: 0, old: null,
-      tag: null, stock: 0, hue: '#e7ecf3', sku: '', material: '', origen: '', sheetNote: '',
+      tag: null, stock: 0, hue: '#e7ecf3', sku: '', material: '', origen: '', sheetNote: '', orderPieces: '', orderPrice: '',
       rating: 4.5, reviews: 0, sold: null, low30: true, images: [],
       reviewsArray: [], features: [], cta: 'Buy Now', ctaLink: '#add', active: true,
     };
@@ -950,6 +950,8 @@
         material: $('#f-material').value.trim(),
         origen: $('#f-origen').value.trim(),
         sheetNote: $('#f-sheet-note').value.trim(),
+        orderPieces: $('#f-order-pieces').value.trim(),
+        orderPrice: $('#f-order-price').value.trim(),
         rating: $('#f-rating').value ? Number($('#f-rating').value) : 4.5,
         reviews: $('#f-reviews-count').value ? Number($('#f-reviews-count').value) : 0,
         sold: $('#f-sold').value ? Number($('#f-sold').value) : null,
@@ -1059,6 +1061,8 @@
       $('#f-material').value = data.material || '';
       $('#f-origen').value = data.origen || '';
       $('#f-sheet-note').value = data.sheetNote || '';
+      $('#f-order-pieces').value = data.orderPieces == null ? '' : data.orderPieces;
+      $('#f-order-price').value = data.orderPrice == null ? '' : data.orderPrice;
       $('#f-rating').value = data.rating == null ? '' : data.rating;
       $('#f-reviews-count').value = data.reviews == null ? '' : data.reviews;
       $('#f-sold').value = data.sold == null ? '' : data.sold;
@@ -1213,6 +1217,8 @@
           material: $('#f-material').value.trim(),
           origen: $('#f-origen').value.trim(),
           sheetNote: $('#f-sheet-note').value.trim(),
+          orderPieces: $('#f-order-pieces').value.trim(),
+          orderPrice: $('#f-order-price').value.trim(),
           rating: $('#f-rating').value ? Number($('#f-rating').value) : 4.5,
           reviews: $('#f-reviews-count').value ? Number($('#f-reviews-count').value) : 0,
           sold: $('#f-sold').value ? Number($('#f-sold').value) : null,
