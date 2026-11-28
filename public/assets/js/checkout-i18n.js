@@ -37,6 +37,7 @@ window.NOVA_I18N_DEFAULTS = {
   loc_hint: 'Elige la opción que aparezca o usa tu ubicación — el mapa saltará a tu punto exacto.',
 
   /* payment / submit */
+  ck_discount: 'de descuento aplicado',
   pay_label: 'Total a pagar al recibir',
   submit: 'Realizar pedido',
   submit_sending: 'Enviando pedido…',
