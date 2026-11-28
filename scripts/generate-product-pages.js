@@ -64,7 +64,17 @@ function fetchSettings() {
   return fetchRest('settings?select=key,value')
     .then((rows) => {
       const out = {};
-      rows.forEach((r) => { if (r && r.key) out[r.key] = r.value; });
+      rows.forEach((r) => {
+        if (!r || !r.key) return;
+        let v = r.value;
+        if (v != null) { try { v = JSON.parse(v); } catch (e) { /* keep raw */ } }
+        out[r.key] = v;
+      });
+      // Exit-offer default: 4 EUR until the admin saves another value.
+      // 0 means the offer is disabled and must stay 0.
+      if (out.exitDiscount == null || out.exitDiscount === '') out.exitDiscount = 4;
+      const d = Number(out.exitDiscount);
+      out.exitDiscount = Number.isFinite(d) && d >= 0 ? Math.min(999, d) : 4;
       return out;
     })
     .catch(() => ({}));
@@ -107,13 +117,61 @@ function buildPage(template, product, slug, settings) {
   const boot = JSON.stringify({ id: product.id, product, settings: settings || {} })
     .replace(/</g, '\\u003c').replace(/&/g, '\\u0026');
 
-  return template
+  // Tiny early pixel stub: product.js can fire ViewContent before pixel.js is
+  // loaded (delayed until the browser is idle). Events replay on activation.
+  const currencyCode = String((settings && settings.currency) || 'USD')
+    .replace(/^["']|["']$/g, '').toUpperCase();
+  const stub = [
+    '(function(){var q=[],c=null;',
+    'window.NovaPixel={__early:true,__queue:q,',
+    'get ready(){return false;},get pixels(){return []},',
+    'get currency(){return ' + JSON.stringify(currencyCode) + ';},',
+    'get capiEnabled(){return false;},',
+    'setCustomer:function(x){c=x||null;},',
+    'track:function(e,p){q.push({event:e,params:p,customer:c});return this;}};})();',
+  ].join('');
+  const refresh = 'window.NOVA_REFRESH=' + JSON.stringify({
+    id: Number(product.id),
+    url: SB_URL + '/rest/v1',
+    key: SB_KEY,
+  }) + ';';
+
+  let html = template
     .replace('<title>Producto — NOVA</title>', '<title>' + esc(title) + '</title>')
     .replace('<meta name="description" content="" />', '<meta name="description" content="' + esc(desc) + '" />')
     .replace('<meta id="og-title" property="og:title" content="" />', '<meta id="og-title" property="og:title" content="' + esc(title) + '" />')
     .replace('<meta id="og-desc" property="og:description" content="" />', '<meta id="og-desc" property="og:description" content="' + esc(desc) + '" />')
     .replace('<!--NOVA_PRODUCT_META-->', meta)
-    .replace('<!--NOVA_PRODUCT_ID-->', '<script>window.NOVA_BOOT=' + boot + ';window.NOVA_PRODUCT_ID=' + Number(product.id) + ';</script>');
+    .replace('<!--NOVA_PRODUCT_ID-->', '<script>window.NOVA_BOOT=' + boot + ';window.NOVA_PRODUCT_ID=' + Number(product.id) + ';' + stub + refresh + '</script>');
+
+  // A Facebook-ad visitor only needs this product: no Supabase SDK, no catalog
+  // and no REST shim on the landing page. The pixel is loaded when idle.
+  const leanScripts = [
+    '<script src="/assets/js/currency.js?v=4"></script>',
+    '<script src="/assets/js/product.js?v=51"></script>',
+    '<script>',
+    '(function(){var load=function(){if(document.querySelector("script[data-nova-pixel]"))return;',
+    'var s=document.createElement("script");s.src="/assets/js/pixel.js?v=6";s.async=true;',
+    's.setAttribute("data-nova-pixel","");document.head.appendChild(s);};',
+    'if("requestIdleCallback" in window)requestIdleCallback(load,{timeout:2500});',
+    'else window.addEventListener("load",function(){setTimeout(load,0);});})();',
+    '</script>',
+    '<script>',
+    '(function(){var load=function(){if(document.querySelector("script[data-nova-offer]"))return;',
+    'var s=document.createElement("script");s.src="/assets/js/exit-offer.js?v=4";s.async=true;',
+    's.setAttribute("data-nova-offer","");document.head.appendChild(s);};',
+    'if("requestIdleCallback" in window)requestIdleCallback(load,{timeout:2000});',
+    'else window.addEventListener("load",function(){setTimeout(load,0);});})();',
+    '</script>',
+  ].join('\n  ');
+
+  const heavy = /<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>[\s\S]*?<script src="\/assets\/js\/product\.js\?v=\d+"><\/script>/;
+  if (!heavy.test(html)) throw new Error('Heavy script block not found in template');
+  html = html.replace(heavy, leanScripts);
+  if (html.includes('/assets/js/store.js') || html.includes('/assets/js/api.js') || html.includes('/assets/js/nova-supabase.js')) {
+    throw new Error('Generated page still loads store/SDK scripts');
+  }
+  return html;
 }
 
 (async () => {

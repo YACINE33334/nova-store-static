@@ -26,6 +26,9 @@
 (function () {
   'use strict';
 
+  if (window.__novaPixelLoaded) return;
+  window.__novaPixelLoaded = true;
+
   var GRAPH_VER = 'v25.0';
 
   var settings = { currency: 'USD' };
@@ -271,6 +274,10 @@
     }
   }
 
+  // Generated landing pages load this script late and queue events in a tiny
+  // stub first, so no ViewContent is lost while the pixel is still idle.
+  var early = (window.NovaPixel && window.NovaPixel.__early) ? window.NovaPixel : null;
+
   window.NovaPixel = {
     get ready() { return ready; },
     get pixels() { return pixelList(); },
@@ -280,18 +287,33 @@
     track: track,
   };
 
-  fetch('/api/settings', { cache: 'no-store' })
-    .then(function (r) { return r.json(); })
-    .then(function (s) {
-      settings = s || {};
-      var list = pixelList();
-      if (list.length) installPixel(list);
-      ready = true;
-      flush();
-      track('PageView');
-    })
-    .catch(function () {
-      ready = true;
-      flush();
-    });
+  function activate(s) {
+    settings = s || {};
+    var list = pixelList();
+    if (list.length) installPixel(list);
+    ready = true;
+    if (early && early.__queue && early.__queue.length) {
+      early.__queue.forEach(function (item) {
+        if (item.customer) setCustomer(item.customer);
+        track(item.event, item.params);
+      });
+      early.__queue.length = 0;
+    }
+    flush();
+    track('PageView');
+  }
+
+  var bootSettings = window.NOVA_BOOT && window.NOVA_BOOT.settings;
+  if (bootSettings && Object.keys(bootSettings).length) {
+    // No /api/settings on generated /<slug>/ pages — the config is baked in.
+    activate(bootSettings);
+  } else {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (s) { activate(s || {}); })
+      .catch(function () {
+        ready = true;
+        flush();
+      });
+  }
 })();

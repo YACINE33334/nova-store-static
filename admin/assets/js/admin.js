@@ -1637,6 +1637,11 @@
           <div class="form-group"><label class="form-label">العملة</label><select class="select-full" id="set-currency"><option value="USD">دولار أمريكي ($)</option><option value="EUR">يورو (€)</option><option value="KWD">دينار كويتي (د.ك)</option></select></div>
         </div>
         <div class="form-group"><label class="form-label">رابط واتساب (wa.me/...)</label><input class="input" id="set-whatsapp" placeholder="https://wa.me/34600000000" dir="ltr" /></div>
+        <div class="form-group">
+          <label class="form-label">خصم عند محاولة المغادرة (يورو) — 0 يعني معطّل</label>
+          <input class="input" type="number" id="set-exit-discount" min="0" max="999" step="0.01" placeholder="4" dir="ltr" />
+          <p class="set-desc" style="color:#666;font-size:13px;margin:8px 0 0">يظهر للزبون عند همّه بمغادرة صفحة المنتج. إذا ضغط «Aplicar descuento» يروح مباشرة للفورم والخصم كيتطبّق فعلياً على المجموع والطلب وسجل Google Sheets.</p>
+        </div>
         <div class="form-group"><label class="form-label">وصف المتجر</label><textarea class="textarea">متجر حديث للعلامات المستقلة — تصميم أوروبي بسيط.</textarea></div>
 
         <div style="margin-top:8px">
@@ -1726,6 +1731,10 @@
         if ($('#set-currency')) settings.currency = $('#set-currency').value;
         if ($('#set-sheet-mode')) settings.sheetLogMode = $('#set-sheet-mode').value;
         if ($('#set-sheet-prepaid')) settings.sheetPrepaid = $('#set-sheet-prepaid').value.trim();
+        if ($('#set-exit-discount')) {
+          const d = parseFloat($('#set-exit-discount').value);
+          settings.exitDiscount = Number.isFinite(d) && d >= 0 ? Math.min(999, d) : 0;
+        }
         if ($('#pixel-rows')) settings.fbPixels = collectPixelRows();
         fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
           .then(() => toast('تم حفظ الإعدادات', 'success'))
@@ -1745,6 +1754,10 @@
           if ($('#set-currency')) $('#set-currency').value = settings.currency || 'USD';
           if ($('#set-sheet-mode')) $('#set-sheet-mode').value = settings.sheetLogMode === 'live' ? 'live' : 'test';
           if ($('#set-sheet-prepaid')) $('#set-sheet-prepaid').value = settings.sheetPrepaid || '';
+          if ($('#set-exit-discount')) {
+            const d = Number(settings.exitDiscount);
+            $('#set-exit-discount').value = Number.isFinite(d) && d >= 0 ? String(d) : '4';
+          }
           if (name === 'pixel') {
             let rows = settings.fbPixels;
             if (!Array.isArray(rows) && (settings.fbPixel || settings.fbToken)) {

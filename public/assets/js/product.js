@@ -163,32 +163,12 @@
     return { s5: 68, s4: 19, s3: 6, s2: 3, s1: 4 };
   }
 
-  function reviewsHtml(p, list) {
-    const totalCount = (p.reviewsArray && p.reviewsArray.length) ? list.length : (p.reviews || list.length);
-    const pagePhotos = [];
-    for (let i = 0; i < list.length; i++) {
-      const r = list[i];
-      if (r.imgs && r.imgs.length) r.imgs.forEach((src) => pagePhotos.push({ src, review: r }));
-    }
-    const thumbHtml = (ph, pi) => `
-        <button class="rv-strip-thumb" type="button" data-pi="${pi}" aria-label="Foto de ${ph.review.n}">
-          <img src="${ph.src}" alt="Foto de ${ph.review.n}">
-        </button>`;
-    const visibleReviews = list.slice(0, 6);
-    const initThumbs = pagePhotos
-      .filter((ph) => visibleReviews.includes(ph.review))
-      .map((ph) => thumbHtml(ph, pagePhotos.indexOf(ph))).join('');
-    const photoStrip = pagePhotos.length
-      ? `
-        <div class="rv-strip-sec">
-          <div class="rv-strip-head">
-            <h4>Fotos de clientes</h4>
-            <a href="#" class="rv-strip-all">Ver todas las fotos &rarr;</a>
-          </div>
-          <div class="rv-strip">
-            ${initThumbs}
-          </div>
-        </div>` : '';
+  // The score/count render immediately; the full review list is injected only
+  // when the section is about to be scrolled into view.
+  function reviewsSummaryHtml(p) {
+    const totalCount = (p.reviewsArray && p.reviewsArray.length)
+      ? p.reviewsArray.length
+      : (p.reviews || 0);
     const d = ratingDist(p.rating);
     const bars = ['5', '4', '3', '2', '1'].map((s) => {
       const v = d['s' + s];
@@ -199,6 +179,24 @@
           <span class="rv-bar-pct">${v}%</span>
         </div>`;
     }).join('');
+    return `
+      <div class="rv-summary">
+        <div class="rv-score">
+          <div class="rv-score-num">${p.rating}</div>
+          <div class="rv-score-stars">${starRow(p.rating)}</div>
+          <div class="rv-score-total">${totalCount} ${totalCount === 1 ? 'rese&ntilde;a' : 'rese&ntilde;as'} &middot; ${p.sold ? p.sold + ' vendidos' : ''}</div>
+        </div>
+        <div class="rv-bars">${bars}</div>
+        <button class="btn rv-write" type="button">Escribir una rese&ntilde;a</button>
+      </div>`;
+  }
+
+  function reviewsListHtml(p, list) {
+    const pagePhotos = [];
+    for (let i = 0; i < list.length; i++) {
+      const r = list[i];
+      if (r.imgs && r.imgs.length) r.imgs.forEach((src) => pagePhotos.push({ src, review: r }));
+    }
     const items = list.map((r, i) => {
       const rPhotos = (r.imgs || []).map((src) => {
         const pi = pagePhotos.findIndex((ph) => ph.src === src && ph.review === r);
@@ -230,26 +228,14 @@
       </article>`;
     }).join('');
     return `
-      <div class="reviews">
-        <div class="rv-summary">
-          <div class="rv-score">
-            <div class="rv-score-num">${p.rating}</div>
-            <div class="rv-score-stars">${starRow(p.rating)}</div>
-            <div class="rv-score-total">${totalCount} ${totalCount === 1 ? 'rese&ntilde;a' : 'rese&ntilde;as'} &middot; ${p.sold ? p.sold + ' vendidos' : ''}</div>
-          </div>
-          <div class="rv-bars">${bars}</div>
-          <button class="btn rv-write" type="button">Escribir una rese&ntilde;a</button>
+      <div class="rv-list">
+        <div class="rv-filter">
+          <button class="rv-chip active" type="button">Todas</button>
+          <button class="rv-chip" type="button">Positivas</button>
+          <button class="rv-chip" type="button">Negativas</button>
         </div>
-        <div class="rv-list">
-          ${photoStrip}
-          <div class="rv-filter">
-            <button class="rv-chip active" type="button">Todas</button>
-            <button class="rv-chip" type="button">Positivas</button>
-            <button class="rv-chip" type="button">Negativas</button>
-          </div>
-          ${items}
-          <button class="btn rv-more" type="button">Ver todas las rese&ntilde;as</button>
-        </div>
+        ${items}
+        <button class="btn rv-more" type="button">Ver todas las rese&ntilde;as</button>
       </div>`;
   }
 
@@ -386,7 +372,10 @@
 
           <div class="p-info-block" id="resenas">
             <h3 class="p-block-title">Rese&ntilde;as (${reviewCount})</h3>
-            ${reviewsHtml(product, resolvedReviews)}
+            <div class="reviews">
+              ${reviewsSummaryHtml(product)}
+              <div class="rv-lazy" data-rv-lazy></div>
+            </div>
           </div>
 
           <div class="p-info-block">
@@ -400,14 +389,14 @@
 
     // --- Interactions ---
 
-    // Review photos lightbox (strip + inline card photos, event delegation)
+    // Review photos lightbox (inline card photos only, event delegation)
     const pagePhotos = [];
     for (let i = 0; i < resolvedReviews.length; i++) {
       const r = resolvedReviews[i];
       if (r.imgs && r.imgs.length) r.imgs.forEach((src) => pagePhotos.push({ src, review: r }));
     }
     root.addEventListener('click', (ev) => {
-      const el = ev.target.closest('.rv-strip-thumb, .rv-photo');
+      const el = ev.target.closest('.rv-photo');
       if (!el) return;
       const ph = pagePhotos[Number(el.getAttribute('data-pi'))];
         if (!ph) return;
@@ -448,93 +437,97 @@
         document.body.style.overflow = 'hidden';
     });
 
-    // Ver todas las reseñas toggle (shows/hides the extra reviews + strip photos)
-    const moreBtn = root.querySelector('.rv-more');
-    if (moreBtn) {
-      moreBtn.addEventListener('click', () => {
-        const rvList = root.querySelector('.rv-list');
+    // Full review list is injected only when the section nears the viewport.
+    function bindReviews(listBox) {
+      // Ver todas las reseñas toggle
+      const moreBtn = listBox.querySelector('.rv-more');
+      const applyFilter = (mode) => {
+        const rvList = listBox.querySelector('.rv-list');
         if (!rvList) return;
-        const expanded = rvList.classList.toggle('expanded');
-        moreBtn.textContent = expanded ? 'Ver menos' : 'Ver todas las rese\u00f1as';
-        const strip = root.querySelector('.rv-strip');
-        if (strip && pagePhotos.length) {
-          strip.innerHTML = pagePhotos.map((ph, pi) => `
-            <button class="rv-strip-thumb" type="button" data-pi="${pi}" aria-label="Foto de ${ph.review.n}">
-              <img src="${ph.src}" alt="Foto de ${ph.review.n}">
-            </button>`).join('');
+        let expandNow = rvList.classList.contains('expanded');
+        const matches = { top: 0, extra: 0 };
+        listBox.querySelectorAll('.rv').forEach((card) => {
+          const pol = card.dataset.pol;
+          const match = mode === 'all' ? true : mode === 'pos' ? pol !== 'neg' : pol === 'neg';
+          if (match) {
+            if (card.classList.contains('rv-extra')) matches.extra += 1;
+            else matches.top += 1;
+          }
+        });
+        if (mode !== 'all' && matches.top === 0 && matches.extra > 0) expandNow = true;
+        listBox.querySelectorAll('.rv').forEach((card) => {
+          const pol = card.dataset.pol;
+          const match = mode === 'all' ? true : mode === 'pos' ? pol !== 'neg' : pol === 'neg';
+          const visible = match && (!card.classList.contains('rv-extra') || expandNow);
+          card.style.display = visible ? '' : 'none';
+        });
+        if (expandNow) rvList.classList.add('expanded');
+        if (moreBtn) {
+          moreBtn.textContent = (mode === 'pos')
+            ? (expandNow ? 'Ver menos' : 'Ver todas las positivas')
+            : (mode === 'neg')
+              ? (expandNow ? 'Ver menos' : 'Ver todas las negativas')
+              : (expandNow ? 'Ver menos' : 'Ver todas las rese\u00f1as');
         }
-        const activeChip = root.querySelector('.rv-chip.active');
-        if (activeChip) {
-          const idx = [...root.querySelectorAll('.rv-chip')].indexOf(activeChip);
+      };
+      if (moreBtn) {
+        moreBtn.addEventListener('click', () => {
+          const rvList = listBox.querySelector('.rv-list');
+          if (!rvList) return;
+          const expanded = rvList.classList.toggle('expanded');
+          moreBtn.textContent = expanded ? 'Ver menos' : 'Ver todas las rese\u00f1as';
+          const activeChip = listBox.querySelector('.rv-chip.active');
+          if (activeChip) {
+            const idx = [...listBox.querySelectorAll('.rv-chip')].indexOf(activeChip);
+            applyFilter(idx === 0 ? 'all' : idx === 1 ? 'pos' : 'neg');
+          }
+          const hidden = listBox.querySelector('.rv-extra');
+          if (hidden) hidden.scrollIntoView({ block: 'start' });
+        });
+      }
+      const chips = listBox.querySelectorAll('.rv-chip');
+      chips.forEach((chip, idx) => {
+        chip.addEventListener('click', () => {
+          chips.forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
           applyFilter(idx === 0 ? 'all' : idx === 1 ? 'pos' : 'neg');
+        });
+      });
+      listBox.querySelectorAll('.rv').forEach((card) => {
+        const body = card.querySelector('.rv-body');
+        const toggle = card.querySelector('.rv-moretoggle');
+        if (!body || !toggle) return;
+        if (body.scrollHeight <= 260) {
+          toggle.style.display = 'none';
+        } else {
+          body.classList.add('collapsed');
+          toggle.addEventListener('click', () => {
+            const expanded = body.classList.toggle('collapsed');
+            toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            toggle.innerHTML = expanded ? '<span>&or;</span> Leer m&aacute;s' : '<span>&and;</span> Leer menos';
+          });
         }
-        const hidden = document.querySelector('.rv-extra');
-        if (hidden) hidden.scrollIntoView({ block: 'start' });
       });
     }
 
-    // Filter chips: Todas / Positivas / Negativas
-    const chips = root.querySelectorAll('.rv-chip');
-    const applyFilter = (mode) => {
-      const rvList = root.querySelector('.rv-list');
-      if (!rvList) return;
-      let expandNow = rvList.classList.contains('expanded');
-      const matches = { top: 0, extra: 0 };
-      root.querySelectorAll('.rv').forEach((card) => {
-        const pol = card.dataset.pol;
-        const match =
-          mode === 'all' ? true :
-          mode === 'pos' ? pol !== 'neg' :
-          mode === 'neg' ? pol === 'neg' : true;
-        if (match) {
-          if (card.classList.contains('rv-extra')) matches.extra += 1;
-          else matches.top += 1;
-        }
-      });
-      if (mode !== 'all' && matches.top === 0 && matches.extra > 0) {
-        expandNow = true;
-      }
-      root.querySelectorAll('.rv').forEach((card) => {
-        const pol = card.dataset.pol;
-        const match =
-          mode === 'all' ? true :
-          mode === 'pos' ? pol !== 'neg' :
-          mode === 'neg' ? pol === 'neg' : true;
-        const isExtra = card.classList.contains('rv-extra');
-        const visible = match && (!isExtra || expandNow);
-        card.style.display = visible ? '' : 'none';
-      });
-      if (expandNow) rvList.classList.add('expanded');
-      moreBtn.textContent = (mode === 'pos')
-        ? (expandNow ? 'Ver menos' : 'Ver todas las positivas')
-        : (mode === 'neg')
-          ? (expandNow ? 'Ver menos' : 'Ver todas las negativas')
-          : (expandNow ? 'Ver menos' : 'Ver todas las rese\u00f1as');
+    const lazyBox = root.querySelector('[data-rv-lazy]');
+    const fillReviews = () => {
+      if (!lazyBox || lazyBox.dataset.filled) return;
+      lazyBox.dataset.filled = '1';
+      lazyBox.innerHTML = reviewsListHtml(product, resolvedReviews);
+      bindReviews(lazyBox);
     };
-    chips.forEach((chip, idx) => {
-      chip.addEventListener('click', () => {
-        chips.forEach((c) => c.classList.remove('active'));
-        chip.classList.add('active');
-        applyFilter(idx === 0 ? 'all' : idx === 1 ? 'pos' : 'neg');
-      });
-    });
-
-    // Read more / Leer más toggle
-    root.querySelectorAll('.rv').forEach((card) => {
-      const body = card.querySelector('.rv-body');
-      const toggle = card.querySelector('.rv-moretoggle');
-      if (!body || !toggle) return;
-      if (body.scrollHeight <= 260) {
-        toggle.style.display = 'none';
-      } else {
-        body.classList.add('collapsed');
-        toggle.addEventListener('click', () => {
-          const expanded = body.classList.toggle('collapsed');
-          toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-          toggle.innerHTML = expanded ? '<span>&or;</span> Leer m&aacute;s' : '<span>&and;</span> Leer menos';
-        });
-      }
-    });
+    const reviewSection = root.querySelector('#resenas');
+    if ('IntersectionObserver' in window && reviewSection) {
+      const rio = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { fillReviews(); rio.disconnect(); }
+      }, { rootMargin: '300px 0px' });
+      rio.observe(reviewSection);
+    } else {
+      fillReviews();
+    }
+    // Safety net for browsers that throttle IntersectionObserver in background tabs.
+    setTimeout(fillReviews, 5000);
 
     // Size options
     
@@ -662,6 +655,85 @@
     return res.json();
   }
 
+  /* Hand the product to the checkout tab so /order.html can paint the form
+     instantly instead of waiting for the SDK + catalog again. */
+  function rememberCheckout(P) {
+    try {
+      const img = Array.isArray(P.images) && P.images[0] ? P.images[0] : '';
+      sessionStorage.setItem('nova_checkout_product', JSON.stringify({
+        id: P.id,
+        name: P.name,
+        cat: P.cat,
+        price: P.price,
+        old: P.old,
+        hue: P.hue,
+        images: img ? [img] : [],
+        sku: P.sku,
+        orderPieces: P.orderPieces,
+        orderPrice: P.orderPrice,
+        sheetNote: P.sheetNote || P.note || '',
+      }));
+      const code = window.NOVA_MONEY && window.NOVA_MONEY.code
+        ? window.NOVA_MONEY.code
+        : ((window.NOVA_BOOT && window.NOVA_BOOT.settings && window.NOVA_BOOT.settings.currency) || 'USD');
+      sessionStorage.setItem('nova_checkout_currency', String(code).replace(/^["']|["']$/g, '').toUpperCase());
+    } catch (e) { /* storage disabled: checkout falls back to the API */ }
+  }
+
+  /* Generated /<slug>/ pages paint from baked data, then quietly check the
+     product row once (no SDK, no catalog) so admin edits still show up. */
+  function applyFreshProduct(fresh) {
+    const P = window.__novaRenderedProduct;
+    if (!P || !fresh) return;
+    let changed = false;
+    ['name', 'headline', 'price', 'old', 'sku', 'cat', 'cta', 'stock', 'rating', 'reviews'].forEach((k) => {
+      if (fresh[k] != null && JSON.stringify(fresh[k]) !== JSON.stringify(P[k])) {
+        P[k] = fresh[k];
+        changed = true;
+      }
+    });
+    if (!changed) return;
+    refreshPrices(P);
+    const sp = document.getElementById('p-sticky-price');
+    if (sp) {
+      sp.innerHTML = P.old
+        ? currency(P.price) + ' <s class="p-sticky-price-old">' + currency(P.old) + '</s>'
+        : currency(P.price);
+    }
+    const titleEl = document.querySelector('.p-title');
+    if (titleEl) titleEl.textContent = P.headline || P.name;
+    const crumb = document.querySelector('.crumb-current');
+    if (crumb) crumb.textContent = P.name;
+    document.title = P.name + ' — NOVA';
+  }
+
+  function scheduleBakedRefresh() {
+    const cfg = window.NOVA_REFRESH;
+    if (!cfg || !cfg.id) return;
+    const run = () => {
+      const headers = { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key };
+      Promise.all([
+        fetch(cfg.url + '/products?select=id,data&id=eq.' + cfg.id, { headers, cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : [])).catch(() => []),
+        fetch(cfg.url + '/settings?select=key,value', { headers, cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : [])).catch(() => []),
+      ]).then((res) => {
+        const row = Array.isArray(res[0]) ? res[0][0] : null;
+        if (row && row.data && Number(row.data.id) === Number(cfg.id)) applyFreshProduct(row.data);
+        if (window.NOVA_MONEY && window.NOVA_MONEY.setCurrency && Array.isArray(res[1])) {
+          const s = {};
+          res[1].forEach((r) => {
+            if (!r || !r.key) return;
+            try { s[r.key] = JSON.parse(r.value); } catch (e) { s[r.key] = r.value; }
+          });
+          if (s.currency) window.NOVA_MONEY.setCurrency(s.currency);
+        }
+      }).catch(() => { /* refresh is best-effort, never blocks the page */ });
+    };
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 3000 });
+    else setTimeout(run, 1200);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('product-root');
     if (!root) return;
@@ -725,7 +797,9 @@
 
       render(P, root);
       window.__novaRenderedProduct = P;
+      rememberCheckout(P);
       window.addEventListener('nova:money', () => refreshPrices(window.__novaRenderedProduct));
+      scheduleBakedRefresh();
 
       if (window.NovaPixel) {
         window.NovaPixel.track('ViewContent', {

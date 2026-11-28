@@ -161,9 +161,10 @@
 
   /* ---- shared uploader: posts raw body to /api/upload (XHR shim →
        NS.uploadBytes → Supabase Storage) and calls the insert callback ---- */
-  function uploadToDesc(file, opts, onOk) {
+  async function uploadToDesc(file, opts, onOk) {
     const label = opts.label;
     label.classList.add('busy');
+    file = await optimizeImage(file);
     try {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload');
@@ -206,6 +207,65 @@
 
   function isVideoFile(f) {
     return !!f && (/^video\//i.test(f.type) || /\.(mp4|webm|ogv|ogg|mov)$/i.test(f.name || ''));
+  }
+
+  /* ---- browser-side image optimizer ------------------------------------
+     Re-encodes raster uploads as WebP (quality 80) and caps width at 1000px
+     before anything is sent to Storage. SVG/GIF/videos are passed through
+     unchanged (animation/vector data must not be destroyed). */
+  const WEBP_QUALITY = 0.8;
+  const WEBP_MAX_WIDTH = 1000;
+
+  function optimizableImage(f) {
+    if (!f) return false;
+    if (/^image\/(gif|svg\+xml)$/i.test(f.type)) return false;
+    if (/\.(gif|svg)$/i.test(f.name || '')) return false;
+    return /^image\//i.test(f.type) || /\.(png|jpe?g|webp|bmp|avif)$/i.test(f.name || '');
+  }
+
+  function optimizeImage(file) {
+    return new Promise((resolve) => {
+      if (!optimizableImage(file) || typeof Image === 'undefined'
+          || !HTMLCanvasElement.prototype.toBlob) {
+        resolve(file);
+        return;
+      }
+      let objectUrl = '';
+      try { objectUrl = URL.createObjectURL(file); } catch (e) { resolve(file); return; }
+      const img = new Image();
+      const done = (out) => {
+        try { URL.revokeObjectURL(objectUrl); } catch (e) { /* noop */ }
+        resolve(out || file);
+      };
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if (!w || !h) { done(file); return; }
+          const scale = w > WEBP_MAX_WIDTH ? WEBP_MAX_WIDTH / w : 1;
+          const tw = Math.max(1, Math.round(w * scale));
+          const th = Math.max(1, Math.round(h * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = tw;
+          canvas.height = th;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { done(file); return; }
+          ctx.imageSmoothingEnabled = true;
+          if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, tw, th);
+          canvas.toBlob((blob) => {
+            if (!blob || blob.type !== 'image/webp' || !blob.size) { done(file); return; }
+            const base = String(file.name || 'image').replace(/\.[^.]+$/, '') || 'image';
+            done(new File([blob], base + '.webp', { type: 'image/webp', lastModified: Date.now() }));
+          }, 'image/webp', WEBP_QUALITY);
+        } catch (e) {
+          console.warn('[editor] WebP optimization skipped:', e);
+          done(file);
+        }
+      };
+      img.onerror = () => done(file);
+      img.src = objectUrl;
+    });
   }
 
   function bindDescModes() {
@@ -454,16 +514,17 @@
               </label>
               <button class="ed-img-del" type="button" aria-label="حذف الصورة">&times;</button>`;
           row.querySelector('.ed-img-input').addEventListener('input', (e) => { rv.imgs[ii] = e.target.value.trim(); });
-          row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', (e) => {
+          row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', async (e) => {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             const btn = row.querySelector('.ed-img-upload');
             const prev = row.querySelector('.ed-img-input').value;
             btn.classList.add('busy');
+            const optimized = await optimizeImage(file);
             try {
               const xhr = new XMLHttpRequest();
               xhr.open('POST', '/api/upload');
-              xhr.setRequestHeader('Content-Type', file.type);
+              xhr.setRequestHeader('Content-Type', optimized.type);
               xhr.onload = () => {
                 btn.classList.remove('busy');
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -481,7 +542,7 @@
                 }
               };
               xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-              xhr.send(file);
+              xhr.send(optimized);
               e.target.value = '';
             } catch (err) {
               btn.classList.remove('busy');
@@ -839,16 +900,17 @@
         data.images[index] = e.target.value.trim();
         refreshPreview();
       });
-      row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', (e) => {
+      row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', async (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         const btn = row.querySelector('.ed-img-upload');
         const prev = input.value;
         btn.classList.add('busy');
+        const optimized = await optimizeImage(file);
         try {
           const xhr = new XMLHttpRequest();
           xhr.open('POST', '/api/upload');
-          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.setRequestHeader('Content-Type', optimized.type);
           xhr.onload = () => {
             btn.classList.remove('busy');
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -867,7 +929,7 @@
             }
           };
           xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-          xhr.send(file);
+          xhr.send(optimized);
           e.target.value = '';
         } catch (err) {
           btn.classList.remove('busy');
@@ -1133,16 +1195,17 @@
         input.addEventListener('input', (e) => {
           data.images[index] = e.target.value.trim();
         });
-        row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', (e) => {
+        row.querySelector('.ed-img-upload input[type=file]').addEventListener('change', async (e) => {
           const file = e.target.files && e.target.files[0];
           if (!file) return;
           const btn = row.querySelector('.ed-img-upload');
           const prev = input.value;
           btn.classList.add('busy');
+          const optimized = await optimizeImage(file);
           try {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/upload');
-            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.setRequestHeader('Content-Type', optimized.type);
             xhr.onload = () => {
               btn.classList.remove('busy');
               if (xhr.status >= 200 && xhr.status < 300) {
@@ -1161,7 +1224,7 @@
               }
             };
             xhr.onerror = () => { btn.classList.remove('busy'); toast('تعذر الاتصال'); };
-            xhr.send(file);
+            xhr.send(optimized);
             e.target.value = '';
           } catch (err) {
             btn.classList.remove('busy');

@@ -436,6 +436,7 @@
 .rv-bar-pct { font-size: 11.5px; color: var(--color-ink-muted); text-align: right; }
 .rv-write { width: 100%; justify-content: center; }
 .rv-list { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 100%; }
+.rv-lazy { min-width: 0; max-width: 100%; }
 .rv-extra { display: none; }
 .rv-list.expanded .rv-extra { display: block; }
 .rv-filter {

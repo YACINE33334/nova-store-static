@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/base.css?v=5" />
   <link rel="stylesheet" href="assets/css/store.css?v=10" />
-  <link rel="stylesheet" href="assets/css/order.css?v=12" />
+  <link rel="stylesheet" href="assets/css/order.css?v=13" />
 </head>
 <body>
   <div class="announce">Envío gratis en pedidos superiores a $100</div>
@@ -56,15 +56,64 @@
     </div>
   </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/nova-supabase.js?v=2"></script>
-  <script src="assets/js/api.js?v=6"></script>
-<script src="assets/js/currency.js?v=2"></script>
-<script src="assets/js/pixel.js?v=5"></script>
-<script src="assets/js/slug.js?v=2"></script>
-<script src="assets/js/store.js?v=14"></script>
-<script src="assets/js/checkout-i18n.js?v=3"></script>
-<script src="assets/js/order.js?v=31"></script>
+<script>
+(function () {
+  // A visitor arriving from a product page already has the product in
+  // sessionStorage: order.js paints the form before any SDK is downloaded.
+  var boot = null, cur = 'USD';
+  try {
+    cur = sessionStorage.getItem('nova_checkout_currency') || 'USD';
+    var p = JSON.parse(sessionStorage.getItem('nova_checkout_product') || 'null');
+    if (p && Number(p.id)) boot = { id: Number(p.id), product: p, currency: cur };
+  } catch (e) { /* visita directa: se usa la API */ }
+  if (boot) window.NOVA_CHECKOUT_BOOT = boot;
+
+  // Early pixel stub: InitiateCheckout / Purchase are queued, never lost.
+  var q = [], customer = null;
+  window.NovaPixel = {
+    __early: true, __queue: q,
+    get ready() { return false; },
+    get pixels() { return []; },
+    get currency() { return cur || 'USD'; },
+    get capiEnabled() { return false; },
+    setCustomer: function (x) { customer = x || null; },
+    track: function (e, p) { q.push({ event: e, params: p, customer: customer }); return this; },
+  };
+
+  function loadSeq(list, done) {
+    function next() {
+      if (!list.length) { if (done) done(); return; }
+      var s = document.createElement('script');
+      s.src = list.shift();
+      s.async = true;
+      s.onload = next;
+      s.onerror = next;
+      document.head.appendChild(s);
+    }
+    next();
+  }
+  window.novaApiReady = new Promise(function (resolve) { window.__novaApiReadyResolve = resolve; });
+  function start() {
+    loadSeq([
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+      'assets/js/nova-supabase.js?v=2',
+      'assets/js/api.js?v=6',
+    ], function () {
+      window.__novaApiReadyResolve();
+      loadSeq([
+        'assets/js/slug.js?v=2',
+        'assets/js/store.js?v=14',
+        'assets/js/pixel.js?v=6',
+      ]);
+    });
+  }
+  if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 });
+  else setTimeout(start, 0);
+})();
+</script>
+<script src="assets/js/checkout-i18n.js?v=5"></script>
+<script src="assets/js/currency.js?v=4"></script>
+<script src="assets/js/order.js?v=32"></script>
   <script>document.querySelector('[data-year]').textContent = new Date().getFullYear();</script>
 </body>
 </html>

@@ -84,6 +84,7 @@
     </svg>`;
 
   const $ = (sel, scope) => (scope || document).querySelector(sel);
+  const checkoutState = { product: null, pack: null };
 
   /* ---------------- lista de provincias / regiones ---------------- */
   const PROVINCIAS = [
@@ -216,6 +217,28 @@
     return { qty, total, price: qty > 0 ? total / qty : unitFromProduct };
   }
 
+  /* Descuento real de la oferta de salida: ?disc= o sessionStorage.
+     Se aplica SOBRE el pack del producto, nunca en lugar de él. */
+  function exitDiscount() {
+    let n = 0;
+    try {
+      const fromUrl = Number(new URLSearchParams(location.search).get('disc'));
+      const stored = Number(sessionStorage.getItem('nova_exit_discount'));
+      if (Number.isFinite(fromUrl) && fromUrl > 0) n = fromUrl;
+      else if (Number.isFinite(stored) && stored > 0) n = stored;
+    } catch (e) { /* sin almacenamiento: sin descuento */ }
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function buildPack(product, qty) {
+    const pack = packSettings(product, qty);
+    const off = Math.min(exitDiscount(), pack.total);
+    pack.discount = off;
+    pack.total = Math.max(0, pack.total - off);
+    pack.price = pack.qty > 0 ? pack.total / pack.qty : 0;
+    return pack;
+  }
+
   function collectLead(product, qty) {
     const v = (id) => {
       const el = $(id);
@@ -238,7 +261,7 @@
     return body;
   }
 
-  function bindLeadCapture(product, qty) {
+  function bindLeadCapture() {
     let timer = null;
     const post = (body) => {
       fetch('/api/orders', {
@@ -250,7 +273,7 @@
     };
     const send = (immediate) => {
       clearTimeout(timer);
-      const body = collectLead(product, qty);
+      const body = collectLead(checkoutState.product, checkoutState.pack && checkoutState.pack.qty);
       if (!body) return;
       if (immediate) post(body);
       else timer = setTimeout(() => post(body), 400);
@@ -272,7 +295,9 @@
   }
 
   function renderCheckout(product, qty) {
-    const pack = packSettings(product, qty);
+    const pack = buildPack(product, qty);
+    checkoutState.product = product;
+    checkoutState.pack = pack;
     const total = pack.total;
     const pimg = Array.isArray(product.images) && product.images[0] ? product.images[0] : null;
     const thumb = pimg
@@ -299,6 +324,8 @@
           </div>
           <div class="ck-prod-price">${currency(total)}</div>
         </div>
+
+        ${pack.discount > 0 ? `<div class="ck-discount">−${currency(pack.discount)} ${t('ck_discount')}</div>` : ''}
 
         <form class="order-form" id="order-form" novalidate>
           <h2 class="ck-title">${t('fields_head')}</h2>
@@ -356,7 +383,7 @@
     const submitBtn = $('#order-submit');
 
     bindZipCity();
-    bindLeadCapture(product, pack.qty);
+    bindLeadCapture();
 
     if (window.NovaPixel) {
       window.NovaPixel.setCustomer({
@@ -394,13 +421,17 @@
       submitBtn.disabled = true;
       submitBtn.textContent = t('submit_sending');
 
+      if (window.novaApiReady) {
+        try { await window.novaApiReady; } catch (e) { /* el shim avisará del error */ }
+      }
+
       const body = {
         sid: leadSid(),
-        productId: product.id,
+        productId: checkoutState.product.id,
         name, phone,
-        qty: pack.qty,
-        priceOverride: pack.price,
-        totalOverride: pack.total,
+        qty: checkoutState.pack.qty,
+        priceOverride: checkoutState.pack.price,
+        totalOverride: checkoutState.pack.total,
         location: buildLocationString(),
         address: street,
         zip: zip,
@@ -414,8 +445,9 @@
       });
 
       if (ok && data && data.id) {
-        showSuccess(data, product);
-        logOrderToSheet(data, product);
+        try { sessionStorage.removeItem('nova_exit_discount'); } catch (e) { /* ya se aplicó */ }
+        showSuccess(data, checkoutState.product);
+        logOrderToSheet(data, checkoutState.product);
       } else {
         submitBtn.disabled = false;
         submitBtn.textContent = t('submit');
@@ -424,6 +456,16 @@
       }
     });
   }
+
+  function refreshPriceLabels() {
+    if (!checkoutState.pack) return;
+    const label = currency(checkoutState.pack.total);
+    const prodPrice = $('.ck-prod-price');
+    const payTotal = $('.ck-total strong');
+    if (prodPrice) prodPrice.textContent = label;
+    if (payTotal) payTotal.textContent = label;
+  }
+  window.addEventListener('nova:money', refreshPriceLabels);
 
   function showSuccess(order, product) {
     if (window.NovaPixel) {
@@ -496,31 +538,73 @@
   document.addEventListener('DOMContentLoaded', () => {
     const root = $('#order-root');
     if (!root) return;
-    const id = Number(new URLSearchParams(location.search).get('id'));
-    const qty = Math.max(1, Math.min(99, Number(new URLSearchParams(location.search).get('qty')) || 1));
+    const params = new URLSearchParams(location.search);
+    const id = Number(params.get('id'));
+    const qty = Math.max(1, Math.min(99, Number(params.get('qty')) || 1));
+    const boot = window.NOVA_CHECKOUT_BOOT;
+    const bootProduct = boot && Number(boot.id) === id && boot.product && Number(boot.product.id) === id
+      ? boot.product : null;
+
+    function paint(product) {
+      document.title = t('meta_title') + ' — ' + product.name;
+      renderCheckout(product, qty);
+      refreshPriceLabels();
+    }
+
+    /* After the instant paint, quietly verify catalog/admin overrides. Static
+       labels stay as painted so a typing customer never loses their input. */
+    async function refresh(product) {
+      if (window.novaApiReady) {
+        try { await window.novaApiReady; } catch (e) { /* keep painted data */ }
+      }
+      try {
+        const r = await fetchJson('/api/i18n');
+        if (r.data && typeof r.data === 'object') OVERRIDES = r.data;
+      } catch (e) { /* defaults are already Spanish */ }
+
+      let fresh = null;
+      try {
+        const r = await fetchJson('/api/products?id=' + id);
+        if (r.ok && r.data && r.data.id) fresh = r.data;
+      } catch (e) { /* keep the product handed over by the landing page */ }
+      if (!fresh) return;
+
+      checkoutState.product = fresh;
+      checkoutState.pack = buildPack(fresh, qty);
+      const nameEl = $('.ck-prod-name');
+      if (nameEl) nameEl.textContent = fresh.name;
+      const catEl = $('.ck-prod-cat');
+      if (catEl) catEl.innerHTML = escapeHtml(fresh.cat || t('ck_prod_label')) + ' &middot; x' + checkoutState.pack.qty;
+      const thumb = $('.ck-img');
+      if (thumb && fresh.images && fresh.images[0]) thumb.src = fresh.images[0];
+      refreshPriceLabels();
+    }
 
     (async () => {
+      // Coming from a product page: paint immediately, verify in background.
+      if (bootProduct) {
+        paint(bootProduct);
+        refresh(bootProduct);
+        return;
+      }
+      if (window.novaApiReady) {
+        try { await window.novaApiReady; } catch (e) { /* fallback below */ }
+      }
       try {
-        const { data } = await fetchJson('/api/i18n');
-        if (data && typeof data === 'object') OVERRIDES = data;
+        const r = await fetchJson('/api/i18n');
+        if (r.data && typeof r.data === 'object') OVERRIDES = r.data;
       } catch (e) { /* usamos el idioma por defecto */ }
 
       let product = null;
       try {
-        const { ok, data } = await fetchJson('/api/products?id=' + id);
-        if (ok && data && data.id) product = data;
+        const r = await fetchJson('/api/products?id=' + id);
+        if (r.ok && r.data && r.data.id) product = r.data;
       } catch (e) { /* fall through */ }
       if (!product && window.NovaStore) {
         product = window.NovaStore.catalog.find((p) => p.id === id) || null;
       }
       if (!product) { renderNoProduct(t('np_notfound')); return; }
-
-      if (window.NOVA_MONEY) {
-        try { await window.NOVA_MONEY.ready; } catch (e) { /* keep default */ }
-      }
-
-      document.title = t('meta_title') + ' — ' + product.name;
-      renderCheckout(product, qty);
+      paint(product);
     })();
   });
 })();
